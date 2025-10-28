@@ -11,8 +11,6 @@
     <h2 class="text-center mb-4 fw-bold text-primary">
         <i class="bi bi-database me-2"></i>@ViewData["Title"]
     </h2>
-
-    <!-- 🔍 Search + Add -->
     <form asp-action="Index" method="get" class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <div class="d-flex flex-grow-1" style="max-width: 500px;">
             <input type="text" name="keyword" value="@keyword" class="form-control me-2"
@@ -26,8 +24,6 @@
             <i class="bi bi-plus-lg me-1"></i> Add New
         </a>
     </form>
-
-    <!-- 🧾 Table -->
     @if (Model == null || !Model.Items.Any())
     {
         <div class="alert alert-info text-center py-4">
@@ -74,7 +70,6 @@
             Showing @Model.Items.Count of @Model.TotalCount results.
         </div>
     }
-    <!-- Pagination UI -->
     <form id="pageForm" method="get" asp-action="Index" class="d-flex align-items-center mt-3">
         <input type="hidden" name="keyword" value="@keyword" />
         <input type="hidden" name="pageSize" value="10" />
@@ -104,13 +99,11 @@
             const pageInput = document.getElementById("pageInput");
             const pageDisplay = document.getElementById("pageDisplay");
 
-            // Cập nhật trạng thái nút
             function updateButtons(page) {
                 btnPre.disabled = page <= 1;
                 btnNext.disabled = page >= maxPage;
             }
 
-            // Khởi tạo
             updateButtons(parseInt(pageInput.value));
 
             function changePage(delta) {
@@ -124,7 +117,6 @@
                 pageDisplay.textContent = page;
                 updateButtons(page);
 
-                // Gửi form để load lại trang mới
                 document.getElementById("pageForm").submit();
             }
 
