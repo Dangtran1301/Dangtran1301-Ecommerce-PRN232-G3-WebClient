@@ -1,8 +1,5 @@
 ﻿using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
-using PRN232_WebClient_Tachonogy.Models;
-using PRN232_WebClient_Tachonogy.Extensions;
-using System.Text.Json;
 
 namespace PRN232_WebClient_Tachonogy.Extensions
 {

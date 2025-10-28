@@ -1,7 +1,7 @@
-﻿@model PRN232_WebClient_Tachonogy.DTOs.PagedResult<PRN232_WebClient_Tachonogy.DTOs.CategoryDto>
+﻿@model PRN232_WebClient_Tachonogy.DTOs.PagedResult<PRN232_WebClient_Tachonogy.DTOs.BrandDto>
 
 @{
-    ViewData["Title"] = "Category List";
+    ViewData["Title"] = "Brand List";
     var keyword = ViewBag.Keyword as string ?? "";
     var currentPage = ViewBag.Page ?? 1;
     var maxPage = ViewBag.MaxPage ?? 1;
@@ -14,7 +14,7 @@
     <form asp-action="Index" method="get" class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <div class="d-flex flex-grow-1" style="max-width: 500px;">
             <input type="text" name="keyword" value="@keyword" class="form-control me-2"
-                   placeholder="🔍 Search category..." />
+                   placeholder="🔍 Search brand..." />
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-search"></i> Search
             </button>
@@ -30,7 +30,7 @@
     @if (Model == null || !Model.Items.Any())
     {
         <div class="alert alert-info text-center py-4">
-            <i class="bi bi-info-circle me-1"></i> No categories found.
+            <i class="bi bi-info-circle me-1"></i> No brands found.
         </div>
     }
     else
@@ -39,8 +39,9 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark text-white text-uppercase">
                     <tr>
-                        <th>Category Name</th>
+                        <th>Brand Name</th>
                         <th>Description</th>
+                        <th>Website Url</th>
                         @if (User.IsInRole("Admin"))
                         {
                             <th class="text-center" style="width:150px;">Actions</th>
@@ -51,18 +52,19 @@
                     @foreach (var c in Model.Items)
                     {
                         <tr>
-                            <td class="fw-semibold">@c.CategoryName</td>
-                            <td class="text-muted">@c.CategoryDescription</td>
+                            <td class="fw-semibold">@c.BrandName</td>
+                            <td class="text-muted">@c.BrandDescription</td>
+                            <td class="text-muted">@c.WebsiteUrl</td>
                             @if (User.IsInRole("Admin"))
                             {
                                 <td class="text-center">
                                     <a asp-action="Edit" asp-route-id="@c.Id"
-                                    class="btn btn-sm btn-outline-warning me-2">
+                                       class="btn btn-sm btn-outline-warning me-2">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
                                     <form asp-action="Delete" asp-route-id="@c.Id" method="post"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Delete category: @c.CategoryName?');">
+                                          class="d-inline"
+                                          onsubmit="return confirm('Delete brand: @c.BrandName?');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>

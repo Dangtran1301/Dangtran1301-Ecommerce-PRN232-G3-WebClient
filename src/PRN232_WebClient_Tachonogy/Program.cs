@@ -38,7 +38,8 @@ builder.Services.AddHttpClient<ODataApiClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
-
+builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IBrandApiClient, BrandApiClient>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryApiClient, CategoryApiClient>();

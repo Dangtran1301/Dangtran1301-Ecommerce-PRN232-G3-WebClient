@@ -1,7 +1,5 @@
-﻿using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
+
 using PRN232_WebClient_Tachonogy.DTOs;
 namespace PRN232_WebClient_Tachonogy.Extensions
 {
