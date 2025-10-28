@@ -52,11 +52,11 @@ namespace PRN232_WebClient_Tachonogy.Controllers
             var result = await brandService.CreateAsync(dto, cancellationToken);
             if (!result.Success)
             {
-                ModelState.AddModelError("", result.Error?.Message ?? "Error creating brand");
+                ModelState.AddModelError("", result.Error?.Message ?? "Error creating Brand");
                 return View(dto);
             }
 
-            TempData["SuccessMessage"] = "brand created successfully!";
+            TempData["SuccessMessage"] = "Brand created successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -64,15 +64,15 @@ namespace PRN232_WebClient_Tachonogy.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
         {
-            var brand = await brandService.GetByIdAsync(id, cancellationToken);
-            if (!brand.Success || brand.Data == null)
+            var Brand = await brandService.GetByIdAsync(id, cancellationToken);
+            if (!Brand.Success || Brand.Data == null)
                 return NotFound();
 
             var dto = new UpdateBrandRequest
             {
-                BrandName = brand.Data.BrandName.Trim(),
-                BrandDescription = brand.Data.BrandDescription.Trim(),
-                WebsiteUrl = brand.Data.WebsiteUrl.Trim(),
+                BrandName = Brand.Data.BrandName.Trim(),
+                BrandDescription = Brand.Data.BrandDescription.Trim(),
+                WebsiteUrl = Brand.Data.WebsiteUrl.Trim(),
             };
             return View(dto);
         }
@@ -87,11 +87,11 @@ namespace PRN232_WebClient_Tachonogy.Controllers
             var result = await brandService.UpdateAsync(id, dto, cancellationToken);
             if (!result.Success)
             {
-                ModelState.AddModelError("", result.Error?.Message ?? "Error updating brand");
+                ModelState.AddModelError("", result.Error?.Message ?? "Error updating Brand");
                 return View(dto);
             }
 
-            TempData["SuccessMessage"] = "brand updated successfully!";
+            TempData["SuccessMessage"] = "Brand updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -101,9 +101,9 @@ namespace PRN232_WebClient_Tachonogy.Controllers
         {
             var result = await brandService.DeleteAsync(id, cancellationToken);
             if (!result.Success)
-                TempData["ErrorMessage"] = result.Error?.Message ?? "Error deleting brand";
+                TempData["ErrorMessage"] = result.Error?.Message ?? "Error deleting Brand";
             else
-                TempData["SuccessMessage"] = "brand deleted successfully!";
+                TempData["SuccessMessage"] = "Brand deleted successfully!";
 
             return RedirectToAction(nameof(Index));
         }
