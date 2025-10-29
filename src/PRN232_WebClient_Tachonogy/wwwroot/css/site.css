@@ -20,3 +20,21 @@ html {
 body {
     margin-bottom: 60px;
 }
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn {
+    border-radius: 10px;
+    transition: 0.2s ease-in-out;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+.alert {
+    border-radius: 10px;
+}

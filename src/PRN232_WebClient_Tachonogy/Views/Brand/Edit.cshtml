@@ -1,0 +1,30 @@
+﻿@model PRN232_WebClient_Tachonogy.DTOs.UpdateBrandRequest
+@{
+    ViewData["Title"] = "Edit Brand";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-controller="Category" asp-action="Edit" method="post">
+    <div class="mb-3">
+        <label asp-for="BrandName" class="form-label"></label>
+        <input asp-for="BrandName" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BrandDescription" class="form-label"></label>
+        <textarea asp-for="BrandDescription" class="form-control"></textarea>
+        <span asp-validation-for="BrandDescription" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="WebsiteUrl" class="form-label"></label>
+        <textarea asp-for="WebsiteUrl" class="form-control"></textarea>
+        <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
