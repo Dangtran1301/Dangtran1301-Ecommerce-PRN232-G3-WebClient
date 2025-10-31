@@ -1,0 +1,28 @@
+﻿@model PRN232_WebClient_Tachonogy.DTOs.CategoryDto
+@{
+    ViewData["Title"] = "Category Details";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 text-center fw-bold text-primary">
+        <i class="bi bi-eye"></i> @ViewData["Title"]
+    </h2>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 fw-semibold">Category Name:</dt>
+                <dd class="col-sm-9">@Model.CategoryName</dd>
+
+                <dt class="col-sm-3 fw-semibold">Description:</dt>
+                <dd class="col-sm-9">@Model.CategoryDescription</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
