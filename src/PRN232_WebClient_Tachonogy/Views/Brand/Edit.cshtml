@@ -5,7 +5,8 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<form asp-controller="Category" asp-action="Edit" method="post">
+<form asp-controller="Brand" asp-action="Edit" method="post">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
     <div class="mb-3">
         <label asp-for="BrandName" class="form-label"></label>
         <input asp-for="BrandName" class="form-control" readonly />
@@ -18,7 +19,7 @@
     </div>
     <div class="mb-3">
         <label asp-for="WebsiteUrl" class="form-label"></label>
-        <textarea asp-for="WebsiteUrl" class="form-control"></textarea>
+        <input asp-for="WebsiteUrl" type="url" class="form-control" placeholder="https://example.com" />
         <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-success">Save</button>

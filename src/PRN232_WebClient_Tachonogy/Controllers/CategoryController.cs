@@ -105,5 +105,18 @@ namespace PRN232_WebClient_Tachonogy.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Detail(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await categoryService.GetByIdAsync(id, cancellationToken);
+            if (!result.Success || result.Data == null)
+            {
+                TempData["ErrorMessage"] = "Category not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(result.Data);
+        }
     }
 }

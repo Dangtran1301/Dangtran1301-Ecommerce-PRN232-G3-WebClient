@@ -1,0 +1,31 @@
+﻿@model PRN232_WebClient_Tachonogy.DTOs.BrandDto
+@{
+    ViewData["Title"] = "Brand Details";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 text-center fw-bold text-primary">
+        <i class="bi bi-eye"></i> @ViewData["Title"]
+    </h2>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 fw-semibold">Brand Name:</dt>
+                <dd class="col-sm-9">@Model.BrandName</dd>
+
+                <dt class="col-sm-3 fw-semibold">Description:</dt>
+                <dd class="col-sm-9">@Model.BrandDescription</dd>
+
+                <dt class="col-sm-3 fw-semibold">Website URL:</dt>
+                <dd class="col-sm-9">@Model.WebsiteUrl</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
