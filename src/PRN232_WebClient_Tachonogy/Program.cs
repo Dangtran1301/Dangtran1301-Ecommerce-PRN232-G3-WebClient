@@ -3,10 +3,16 @@ using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
 using PRN232_WebClient_Tachonogy.Services;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
 using System.Net.Http.Headers;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
+
+configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAuthentication("CookieAuth")
