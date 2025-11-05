@@ -124,3 +124,22 @@ public class UserFilterRequest
 
     public bool Descending { get; set; } = false;
 }
+public enum Role
+{
+    Admin,
+    Seller,
+    Customer
+}
+
+public enum Gender
+{
+    Male,
+    Female,
+    Unknown
+}
+
+public enum AccountStatus
+{
+    Active,
+    Inactive,
+}

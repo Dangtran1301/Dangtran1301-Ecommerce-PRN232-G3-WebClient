@@ -1,19 +1,20 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PRN232_WebClient_Tachonogy.DTOs;
+using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
+using System.Security.Claims;
 
 namespace PRN232_WebClient_Tachonogy.Controllers;
 
-public class AccountController(IAuthService authService, IUserService userService, IHttpContextAccessor httpContextAccessor)
+public class AccountController(IAuthService authService, ITokenProvider tokenProvider, IHttpContextAccessor httpContextAccessor)
     : Controller
 {
     [HttpGet]
     public IActionResult Login()
     {
-        var accessToken = Request.Cookies["AccessToken"];
+        var accessToken = tokenProvider.AccessToken;
         if (!string.IsNullOrEmpty(accessToken))
             return RedirectToAction("Index", "Home");
         return View();
@@ -27,12 +28,15 @@ public class AccountController(IAuthService authService, IUserService userServic
             return View(dto);
 
         var response = await authService.LoginAsync(dto, cancellationToken);
-        if (!response.Success)
+        if (!response.Success || response.Data is null)
         {
-            ModelState.AddModelError("", response.Error?.Message ?? "Login failed.");
+            ViewBag.ErrorMessages = response.Error?.Message ?? "Login failed.";
             return View(dto);
         }
+
         var user = response.Data.User;
+
+        tokenProvider.SetTokens(response.Data.AccessToken, response.Data.RefreshToken);
 
         var claims = new List<Claim>
         {
@@ -41,8 +45,6 @@ public class AccountController(IAuthService authService, IUserService userServic
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Role, user.Role),
             new("FullName", user.FullName),
-            new("AccessToken", response.Data.AccessToken),
-            new("RefreshToken", response.Data.RefreshToken)
         };
 
         var identity = new ClaimsIdentity(claims, "CookieAuth");
@@ -50,20 +52,25 @@ public class AccountController(IAuthService authService, IUserService userServic
 
         await HttpContext.SignInAsync("CookieAuth", principal);
 
+        TempData["SuccessMessages"] = $"Welcome back, {user.FullName ?? user.UserName}!";
         return RedirectToAction("Index", "Home");
     }
 
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        var refreshToken = Request.Cookies["RefreshToken"];
+        var refreshToken = tokenProvider.RefreshToken;
 
         if (!string.IsNullOrEmpty(refreshToken))
-            await authService.LogoutAsync(new RefreshTokenRequestDto { RefreshToken = refreshToken });
+        {
+            await authService.LogoutAsync(new RefreshTokenRequestDto { RefreshToken = refreshToken }, cancellationToken);
+        }
 
+        tokenProvider.ClearTokens();
         await HttpContext.SignOutAsync("CookieAuth");
+
         return RedirectToAction("Login");
     }
 
@@ -73,7 +80,8 @@ public class AccountController(IAuthService authService, IUserService userServic
 
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(CreateUserRequest dto, CancellationToken cancellationToken)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterRequest dto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return View(dto);
@@ -81,11 +89,11 @@ public class AccountController(IAuthService authService, IUserService userServic
         var result = await authService.RegisterAsync(dto, cancellationToken);
         if (!result.Success)
         {
-            ModelState.AddModelError(string.Empty, result.Error?.Message ?? "Registration failed");
+            ViewBag.ErrorMessages = result.Error?.Message ?? "Registration failed.";
             return View(dto);
         }
 
-        TempData["SuccessMessage"] = "Registration successfully! Please login.";
+        TempData["SuccessMessages"] = "Registration successful! Please login.";
         return RedirectToAction("Login");
     }
 }

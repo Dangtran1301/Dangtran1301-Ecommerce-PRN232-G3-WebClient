@@ -13,33 +13,12 @@ public class AuthService(HttpClient httpClient, ITokenProvider tokenProvider, IL
         var response = await httpClient.PostAsJsonAsync($"{BaseEndpoint}/login", dto, cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponse>>(cancellationToken: cancellationToken);
 
-        if (result?.Data is not null && result.Success)
-        {
-            tokenProvider.SetTokens(result.Data.AccessToken, result.Data.RefreshToken);
-        }
-
         return result ?? new ApiResponse<LoginResponse> { Success = false };
     }
 
-    public async Task<ApiResponse> RegisterAsync(CreateUserRequest dto, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse> RegisterAsync(RegisterRequest dto, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync($"{BaseEndpoint}/register", dto, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorText = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            return new ApiResponse
-            {
-                Success = false,
-                Error = new Error
-                {
-                    Code = response.StatusCode.ToString(),
-                    Message = "Request failed",
-                    Details = errorText
-                },
-                Timestamp = DateTime.UtcNow
-            };
-        }
         var result = await response.Content.ReadFromJsonAsync<ApiResponse>(cancellationToken);
 
         if (result == null)

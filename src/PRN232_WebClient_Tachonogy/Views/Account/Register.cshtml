@@ -1,15 +1,16 @@
-﻿@model PRN232_WebClient_Tachonogy.DTOs.CreateUserRequest
+﻿@model PRN232_WebClient_Tachonogy.DTOs.RegisterRequest
 @{
     ViewData["Title"] = "Register";
+    Layout = "_Layout";
 }
 
 <h2>@ViewData["Title"]</h2>
 
 <form asp-action="Register" method="post">
     <div class="mb-3">
-        <label asp-for="Username" class="form-label"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <label asp-for="UserName" class="form-label"></label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="Email" class="form-label"></label>

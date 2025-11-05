@@ -12,6 +12,8 @@
     <title>@ViewData["Title"] - Tachonogy</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
 </head>
 <body>
     <header>
@@ -26,14 +28,28 @@
                     <ul class="navbar-nav">
                         @if (!string.IsNullOrEmpty(fullName))
                         {
-                            <li class="nav-item">
-                                <span class="nav-link">Hello, @fullName</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="@(User.FindFirst("Avatar")?.Value ?? "/images/default-avatar.png")"
+                                         class="rounded-circle me-2" style="width:32px; height:32px; object-fit:cover;" />
+                                    <span>@fullName</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Index">
+                                            <i class="bi bi-person-circle me-2"></i> My Profile
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
@@ -59,7 +75,7 @@
                                 <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand Management</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="User" asp-action="Index">User Management</a>
+                                <a class="nav-link" asp-controller="Users" asp-action="Index">User Management</a>
                             </li>
                         }
                     </ul>
@@ -72,15 +88,50 @@
             @RenderBody()
         </main>
     </div>
-
+    @if (ViewBag.SuccessMessages != null)
+    {
+        <script>toastr.success("@ViewBag.SuccessMessages");</script>
+    }
+    @if (ViewBag.ErrorMessages != null)
+    {
+        <script>toastr.error("@ViewBag.ErrorMessages");</script>
+    }
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2025 - PRN232_WebClient_Tachonogy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
+
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "3000"
+    };
+
+    @if (ViewBag.SuccessMessages != null)
+    {
+        @:toastr.success("@ViewBag.SuccessMessages");
+    }
+    @if (ViewBag.ErrorMessages != null)
+    {
+        @:toastr.error("@ViewBag.ErrorMessages");
+    }
+
+    @if (TempData["SuccessMessages"] != null)
+    {
+        @:toastr.success("@TempData["SuccessMessages"]");
+    }
+    @if (TempData["ErrorMessages"] != null)
+    {
+        @:toastr.error("@TempData["ErrorMessages"]");
+    }
+</script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
