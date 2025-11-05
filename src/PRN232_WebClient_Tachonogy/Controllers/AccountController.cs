@@ -58,7 +58,6 @@ public class AccountController(IAuthService authService, IUserService userServic
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        var http = httpContextAccessor.HttpContext!;
         var refreshToken = Request.Cookies["RefreshToken"];
 
         if (!string.IsNullOrEmpty(refreshToken))
@@ -79,7 +78,7 @@ public class AccountController(IAuthService authService, IUserService userServic
         if (!ModelState.IsValid)
             return View(dto);
 
-        var result = await userService.CreateAsync(dto, cancellationToken);
+        var result = await authService.RegisterAsync(dto, cancellationToken);
         if (!result.Success)
         {
             ModelState.AddModelError(string.Empty, result.Error?.Message ?? "Registration failed");
