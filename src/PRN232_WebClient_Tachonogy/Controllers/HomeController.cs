@@ -1,7 +1,6 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using PRN232_WebClient_Tachonogy.Models;
+using System.Diagnostics;
 
 namespace PRN232_WebClient_Tachonogy.Controllers
 {
@@ -11,8 +10,6 @@ namespace PRN232_WebClient_Tachonogy.Controllers
 
         public IActionResult Index()
         {
-            var userName = User.FindFirst(ClaimTypes.Name)?.Value;
-            ViewBag.UserName = userName;
             return View();
         }
 
