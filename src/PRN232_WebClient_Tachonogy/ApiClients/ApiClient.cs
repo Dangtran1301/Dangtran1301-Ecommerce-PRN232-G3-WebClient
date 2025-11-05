@@ -1,11 +1,12 @@
-﻿using PRN232_WebClient_Tachonogy.DTOs;
+﻿using PRN232_WebClient_Tachonogy.ApiClients.Interfaces;
+using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
 using PRN232_WebClient_Tachonogy.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace PRN232_WebClient_Tachonogy.Extensions;
+namespace PRN232_WebClient_Tachonogy.ApiClients;
 
 public class ApiClient(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, ITokenProvider tokenProvider)
     : IApiClient

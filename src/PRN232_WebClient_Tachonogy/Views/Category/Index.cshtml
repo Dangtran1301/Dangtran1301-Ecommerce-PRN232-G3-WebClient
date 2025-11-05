@@ -11,6 +11,16 @@
     <h2 class="text-center mb-4 fw-bold text-primary">
         <i class="bi bi-database me-2"></i>@ViewData["Title"]
     </h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success text-center fw-semibold">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger text-center fw-semibold">@TempData["ErrorMessage"]</div>
+    }
+
     <form asp-action="Index" method="get" class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <div class="d-flex flex-grow-1" style="max-width: 500px;">
             <input type="text" name="keyword" value="@keyword" class="form-control me-2"
@@ -27,6 +37,7 @@
             </a>
         }
     </form>
+
     @if (Model == null || !Model.Items.Any())
     {
         <div class="alert alert-info text-center py-4">
@@ -41,10 +52,7 @@
                     <tr>
                         <th>Category Name</th>
                         <th>Description</th>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <th class="text-center" style="width:150px;">Actions</th>
-                        }
+                        <th class="text-center" style="width:220px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,22 +61,26 @@
                         <tr>
                             <td class="fw-semibold">@c.CategoryName</td>
                             <td class="text-muted">@c.CategoryDescription</td>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <td class="text-center">
+                            <td class="text-center">
+                                <a asp-action="Detail" asp-route-id="@c.Id"
+                                   class="btn btn-sm btn-outline-info me-2">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
                                     <a asp-action="Edit" asp-route-id="@c.Id"
-                                    class="btn btn-sm btn-outline-warning me-2">
+                                       class="btn btn-sm btn-outline-warning me-2">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </a>
                                     <form asp-action="Delete" asp-route-id="@c.Id" method="post"
-                                    class="d-inline"
-                                    onsubmit="return confirm('Delete category: @c.CategoryName?');">
+                                          class="d-inline"
+                                          onsubmit="return confirm('Delete category: @c.CategoryName?');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
                                     </form>
-                                </td>
-                            }
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -79,6 +91,8 @@
             Showing @Model.Items.Count of @Model.TotalCount results.
         </div>
     }
+
+    <!-- Pagination -->
     <form id="pageForm" method="get" asp-action="Index" class="d-flex align-items-center mt-3">
         <input type="hidden" name="keyword" value="@keyword" />
         <input type="hidden" name="pageSize" value="10" />
@@ -101,42 +115,37 @@
 </div>
 
 @section Scripts {
-        <script>
-            const maxPage = @maxPage;
-            const btnPre = document.getElementById("btnPre");
-            const btnNext = document.getElementById("btnNext");
-            const pageInput = document.getElementById("pageInput");
-            const pageDisplay = document.getElementById("pageDisplay");
+    <script>
+        const maxPage = @maxPage;
+        const btnPre = document.getElementById("btnPre");
+        const btnNext = document.getElementById("btnNext");
+        const pageInput = document.getElementById("pageInput");
+        const pageDisplay = document.getElementById("pageDisplay");
 
-            function updateButtons(page) {
-                btnPre.disabled = page <= 1;
-                btnNext.disabled = page >= maxPage;
-            }
+        function updateButtons(page) {
+            btnPre.disabled = page <= 1;
+            btnNext.disabled = page >= maxPage;
+        }
 
-            updateButtons(parseInt(pageInput.value));
+        updateButtons(parseInt(pageInput.value));
 
-            function changePage(delta) {
-                let page = parseInt(pageInput.value) || 1;
-                page += delta;
+        function changePage(delta) {
+            let page = parseInt(pageInput.value) || 1;
+            page += delta;
+            if (page < 1) page = 1;
+            if (page > maxPage) page = maxPage;
 
-                if (page < 1) page = 1;
-                if (page > maxPage) page = maxPage;
+            pageInput.value = page;
+            pageDisplay.textContent = page;
+            updateButtons(page);
+            document.getElementById("pageForm").submit();
+        }
 
-                pageInput.value = page;
-                pageDisplay.textContent = page;
-                updateButtons(page);
-
-                document.getElementById("pageForm").submit();
-            }
-
-            function validatePage() {
-                let page = parseInt(pageInput.value);
-                if (!page || page < 1) {
-                    pageInput.value = 1;
-                } else if (page > maxPage) {
-                    pageInput.value = maxPage;
-                }
-                return true;
-            }
-        </script>
+        function validatePage() {
+            let page = parseInt(pageInput.value);
+            if (!page || page < 1) pageInput.value = 1;
+            else if (page > maxPage) pageInput.value = maxPage;
+            return true;
+        }
+    </script>
 }

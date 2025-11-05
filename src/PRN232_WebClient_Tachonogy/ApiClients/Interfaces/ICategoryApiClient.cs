@@ -1,6 +1,6 @@
 ﻿using PRN232_WebClient_Tachonogy.DTOs;
 
-namespace PRN232_WebClient_Tachonogy.Extensions.Interfaces
+namespace PRN232_WebClient_Tachonogy.ApiClients.Interfaces
 {
     public interface ICategoryApiClient
     {
