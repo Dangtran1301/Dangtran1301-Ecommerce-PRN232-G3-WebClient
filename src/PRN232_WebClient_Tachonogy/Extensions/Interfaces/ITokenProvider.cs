@@ -4,6 +4,12 @@ public interface ITokenProvider
 {
     string? AccessToken { get; }
     string? RefreshToken { get; }
+
+    bool IsAuthenticated { get; }
+
+    Guid GetUserId();
+    string? GetUserRole();
+
     void SetTokens(string accessToken, string refreshToken);
     void ClearTokens();
 }
