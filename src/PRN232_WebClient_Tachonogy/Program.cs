@@ -52,6 +52,14 @@ builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryApiClient, CategoryApiClient>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductApiClient, ProductApiClient>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductAttributeApiClient, ProductAttributeApiClient>();
+builder.Services.AddScoped<IProductAttributeService, ProductAttributeService>();
+builder.Services.AddScoped<IProductVariantApiClient, ProductVariantApiClient>();
+builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
+builder.Services.AddScoped<IStockApiClient, StockApiClient>();
+builder.Services.AddScoped<IStockService, StockService>();
 
 var app = builder.Build();
 

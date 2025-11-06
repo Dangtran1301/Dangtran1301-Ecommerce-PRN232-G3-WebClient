@@ -1,0 +1,89 @@
+@model PRN232_WebClient_Tachonogy.DTOs.ProductDto
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.ProductName" 
+                         style="height: 500px; object-fit: contain; background-color: #f8f9fa;"
+                         onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
+                }
+                else
+                {
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 500px;">
+                        <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h1 class="card-title fw-bold text-primary mb-3">@Model.ProductName</h1>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary fs-6 me-2">@Model.BrandName</span>
+                        <span class="badge bg-secondary fs-6">@Model.CategoryName</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h2 class="text-success fw-bold mb-0">$@Model.Price.ToString("N2")</h2>
+                        @if (!string.IsNullOrEmpty(Model.Sku))
+                        {
+                            <small class="text-muted">SKU: @Model.Sku</small>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="mb-4">
+                            <h5 class="fw-semibold">Description</h5>
+                            <p class="text-muted">@Model.Description</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Specifications))
+                    {
+                        <div class="mb-4">
+                            <h5 class="fw-semibold">Specifications</h5>
+                            <div class="text-muted">
+                                @Html.Raw(Model.Specifications.Replace("\n", "<br/>"))
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-primary btn-lg">
+                            <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                        </button>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete product: @Model.ProductName?');">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
