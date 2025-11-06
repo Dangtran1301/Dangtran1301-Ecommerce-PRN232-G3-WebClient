@@ -26,7 +26,7 @@ public class TokenRefreshMiddleware(RequestDelegate next)
 
                     var result = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponse>>();
 
-                    if (result?.Success == true && result.Data is not null)
+                    if (result is { Success: true, Data: not null })
                     {
                         tokenProvider.SetTokens(result.Data.AccessToken, result.Data.RefreshToken);
                     }

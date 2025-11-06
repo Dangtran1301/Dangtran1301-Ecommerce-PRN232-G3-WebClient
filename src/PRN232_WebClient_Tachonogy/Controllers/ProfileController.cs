@@ -14,7 +14,7 @@ namespace PRN232_WebClient_Tachonogy.Controllers
             if (userId == Guid.Empty)
             {
                 ViewBag.ErrorMessage = "You must be logged in to view profile.";
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("Login", "Auth");
             }
 
             var response = await profileService.GetByIdAsync(userId, cancellationToken);
