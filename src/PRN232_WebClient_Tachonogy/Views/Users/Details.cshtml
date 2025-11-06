@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "User Details";
+    Layout = "_Layout";
 }
 
 <div class="container mt-4">
@@ -11,9 +12,14 @@
         </div>
         <div class="card-body">
             <dl class="row">
+                <dt class="col-sm-3">User Id</dt>
+                <dd class="col-sm-9">@Model.UserId</dd>
+                <dt class="col-sm-3">Full Name</dt>
+                <dd class="col-sm-9">@Model.FullName</dd>
+                <dt class="col-sm-3">UserName</dt>
+                <dd class="col-sm-9">@Model.UserName</dd>
                 <dt class="col-sm-3">Email</dt>
                 <dd class="col-sm-9">@Model.Email</dd>
-
                 <dt class="col-sm-3">Role</dt>
                 <dd class="col-sm-9">@Model.Role</dd>
 
