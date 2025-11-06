@@ -54,33 +54,35 @@ namespace PRN232_WebClient_Tachonogy.Controllers
             return View(request);
         }
 
-        [HttpPost("{id:guid}/role")]
-        public async Task<IActionResult> UpdateRole(Guid id, RemoteAuthUserRequest request, CancellationToken cancellationToken)
+        [HttpGet("{id:guid}/edit")]
+        public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
         {
-            var result = await adminService.UpdateRoleAsync(id, request, cancellationToken);
-            if (!result.Success)
+            var result = await adminService.GetByIdAsync(id, cancellationToken);
+            if (!result.Success || result.Data == null)
             {
-                TempData["ErrorMessage"] = result.Error?.Message ?? "Failed to update role.";
+                TempData["ErrorMessage"] = result.Error?.Message ?? "User not found.";
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                TempData["SuccessMessage"] = "User role updated successfully!";
-            }
-            return RedirectToAction(nameof(Index));
+            return View(result.Data);
         }
 
-        [HttpPost("{id:guid}/status")]
-        public async Task<IActionResult> UpdateStatus(Guid id, UpdateStatusAuthUserRequest request, CancellationToken cancellationToken)
+        [HttpPost("{id:guid}/edit")]
+        public async Task<IActionResult> Edit(Guid id, AuthUserResponse model, CancellationToken cancellationToken)
         {
-            var result = await adminService.UpdateStatusAsync(id, request, cancellationToken);
-            if (!result.Success)
+            var roleRequest = new RemoteAuthUserRequest(model.Role);
+            var roleResult = await adminService.UpdateRoleAsync(id, roleRequest, cancellationToken);
+
+            var statusRequest = new UpdateStatusAuthUserRequest(model.AccountStatus);
+            var statusResult = await adminService.UpdateStatusAsync(id, statusRequest, cancellationToken);
+
+            if (!roleResult.Success || !statusResult.Success)
             {
-                TempData["ErrorMessage"] = result.Error?.Message ?? "Failed to update user status.";
+                ViewBag.ErrorMessage =
+                    $"{roleResult.Error?.Message ?? ""} {statusResult.Error?.Message ?? ""}".Trim();
+                return View(model);
             }
-            else
-            {
-                TempData["SuccessMessage"] = "User status updated successfully!";
-            }
+
+            TempData["SuccessMessage"] = "User updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 

@@ -5,11 +5,11 @@ namespace PRN232_WebClient_Tachonogy.Extensions;
 
 public class TokenProvider(IHttpContextAccessor accessor) : ITokenProvider
 {
-    private HttpResponse? Response => accessor.HttpContext?.Response;
-    private HttpRequest? Request => accessor.HttpContext?.Request;
 
-    public string? AccessToken => accessor.HttpContext?.User?.FindFirst("AccessToken")?.Value;
-    public string? RefreshToken => accessor.HttpContext?.User?.FindFirst("RefreshToken")?.Value;
+    private readonly ISession? Session = accessor.HttpContext?.Session;
+
+    public string? AccessToken => Session?.GetString("AccessToken");
+    public string? RefreshToken => Session?.GetString("RefreshToken");
 
     public bool IsAuthenticated => accessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
 
@@ -32,7 +32,7 @@ public class TokenProvider(IHttpContextAccessor accessor) : ITokenProvider
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
+            Expires = DateTimeOffset.UtcNow.AddMinutes(10)
         });
 
         response.Cookies.Append("RefreshToken", refreshToken, new CookieOptions

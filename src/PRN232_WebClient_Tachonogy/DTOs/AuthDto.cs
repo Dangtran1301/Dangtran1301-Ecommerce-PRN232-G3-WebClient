@@ -6,7 +6,7 @@ namespace PRN232_WebClient_Tachonogy.DTOs;
 public class LoginRequestDto
 {
     [Required] public string Username { get; set; } = string.Empty;
-    [PasswordPropertyText] [Required] public string Password { get; set; } = string.Empty;
+    [PasswordPropertyText][Required] public string Password { get; set; } = string.Empty;
 }
 
 public class LoginResponse
@@ -68,14 +68,6 @@ public class AuthUserResponse
     public string AccountStatus { get; set; } = string.Empty;
 }
 
-public record UserProfileResponse(
-    Guid Id,
-    string FullName,
-    string? PhoneNumber,
-    string? Avatar,
-    string? Role
-);
-
 public record RemoteAuthUserRequest(
     [Required(ErrorMessage = "Role is required")]
     string Role
@@ -89,7 +81,8 @@ public record UpdateStatusAuthUserRequest(
 public record ForgotPasswordRequest(
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email address")]
-    string Email
+    string Email,
+    string? ClientUri = null
 );
 
 public record ResetPasswordRequest(
@@ -100,6 +93,19 @@ public record ResetPasswordRequest(
     [MinLength(6, ErrorMessage = "New password must be at least 6 characters long")]
     string NewPassword
 );
+
+public class ChangePasswordRequest
+{
+    [Required]
+    public string OldPassword { get; set; } = string.Empty;
+
+    [Required, MinLength(6)]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Please confirm your new password")]
+    [Compare(otherProperty: nameof(NewPassword), ErrorMessage = "Passwords do not match")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+};
 
 public class UserFilterRequest
 {
@@ -124,6 +130,8 @@ public class UserFilterRequest
 
     public bool Descending { get; set; } = false;
 }
+
+
 public enum Role
 {
     Admin,

@@ -30,8 +30,6 @@
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img src="@(User.FindFirst("Avatar")?.Value ?? "/images/default-avatar.png")"
-                                         class="rounded-circle me-2" style="width:32px; height:32px; object-fit:cover;" />
                                     <span>@fullName</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -42,7 +40,13 @@
                                     </li>
                                     <li><hr class="dropdown-divider" /></li>
                                     <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        <a class="dropdown-item" asp-controller="Auth" asp-action="ChangePassword">
+                                            <i class="bi bi-person-circle me-2"></i> Change password
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="dropdown-item text-danger">
                                                 <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -62,7 +66,7 @@
                                 <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
                             </li>
                         }
 
