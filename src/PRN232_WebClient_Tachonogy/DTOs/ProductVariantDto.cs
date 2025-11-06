@@ -53,3 +53,4 @@ public class ProductVariantFilterDto
     public bool Descending { get; set; } = false;
 }
 
+

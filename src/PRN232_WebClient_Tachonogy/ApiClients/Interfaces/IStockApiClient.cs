@@ -11,3 +11,4 @@ public interface IStockApiClient
     Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
+

@@ -41,3 +41,4 @@ public class ProductAttributeFilterDto
     public bool Descending { get; set; } = false;
 }
 
+

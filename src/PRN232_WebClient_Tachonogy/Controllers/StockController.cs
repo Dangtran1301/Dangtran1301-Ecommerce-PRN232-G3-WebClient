@@ -123,3 +123,4 @@ public class StockController(IStockService service, ILogger<StockController> log
     }
 }
 
+

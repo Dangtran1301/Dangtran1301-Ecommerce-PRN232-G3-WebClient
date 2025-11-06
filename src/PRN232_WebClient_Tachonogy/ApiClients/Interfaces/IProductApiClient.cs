@@ -11,3 +11,4 @@ public interface IProductApiClient
     Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
+

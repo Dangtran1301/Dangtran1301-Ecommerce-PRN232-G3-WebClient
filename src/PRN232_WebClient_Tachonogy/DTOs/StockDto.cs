@@ -41,3 +41,4 @@ public class StockFilterDto
     public bool Descending { get; set; } = false;
 }
 
+
