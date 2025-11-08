@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PRN232_WebClient_Tachonogy.ApiClients;
 using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Controllers;
 
-public class ProductAttributeController(IProductAttributeService service, ILogger<ProductAttributeController> logger) : Controller
+public class ProductAttributeController(
+    IProductAttributeService service,
+    IProductService productService,
+    ODataApiClient odataApiClient,
+    ILogger<ProductAttributeController> logger) : Controller
 {
     [HttpGet]
     [AllowAnonymous]
@@ -17,7 +22,7 @@ public class ProductAttributeController(IProductAttributeService service, ILogge
             ProductId = productId,
             PageIndex = page,
             PageSize = pageSize,
-            OrderBy = "CreatedAt",
+            OrderBy = "Id",
             Descending = false
         };
 
@@ -34,30 +39,153 @@ public class ProductAttributeController(IProductAttributeService service, ILogge
         return View(new PagedResult<ProductAttributeDto>([], 0, 0, 0));
     }
 
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     [HttpGet]
-    public IActionResult Create() => View();
+    public async Task<IActionResult> Create(Guid? productId, CancellationToken cancellationToken = default)
+    {
+        // Load all products for dropdown using REST API
+        try
+        {
+            var productsResult = await productService.GetAllAsync(cancellationToken);
+            
+            if (productsResult.Success && productsResult.Data != null)
+            {
+                ViewBag.Products = productsResult.Data.ToList();
+                logger.LogInformation("Loaded {Count} products for dropdown", productsResult.Data.Count);
+            }
+            else
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products. Please try again.";
+                logger.LogWarning("Failed to load products: {Error}", productsResult.Error?.Message ?? "Unknown error");
+            }
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Products = new List<ProductDto>();
+            ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+            logger.LogError(ex, "Exception while loading products for dropdown");
+        }
 
-    [Authorize(Roles = "Admin")]
+        if (productId.HasValue)
+        {
+            ViewBag.ProductId = productId.Value;
+        }
+        return View();
+    }
+
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductAttributeRequest dto, CancellationToken cancellationToken)
     {
+        // Validate ProductId
+        if (dto.ProductId == Guid.Empty)
+        {
+            ModelState.AddModelError("ProductId", "Please select a product.");
+        }
+        
+        // Reload products for dropdown if validation fails
         if (!ModelState.IsValid)
+        {
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                    ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+                logger.LogError(ex, "Exception while reloading products");
+            }
             return View(dto);
+        }
 
+        // Trim and validate input
         dto = dto with
         {
             AttributeName = dto.AttributeName?.Trim() ?? "",
             AttributeValue = dto.AttributeValue?.Trim() ?? ""
         };
-
-        var result = await service.CreateAsync(dto, cancellationToken);
-        if (!result.Success)
+        
+        // Re-validate after trimming
+        if (string.IsNullOrWhiteSpace(dto.AttributeName))
         {
-            ModelState.AddModelError("", result.Error?.Message ?? "Error creating product attribute");
+            ModelState.AddModelError("AttributeName", "Attribute name is required");
+        }
+        
+        if (string.IsNullOrWhiteSpace(dto.AttributeValue))
+        {
+            ModelState.AddModelError("AttributeValue", "Attribute value is required");
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            // Reload products for dropdown
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                }
+            }
+            catch
+            {
+                ViewBag.Products = new List<ProductDto>();
+            }
             return View(dto);
         }
 
+        logger.LogInformation("Creating product attribute: ProductId={ProductId}, AttributeName={AttributeName}, AttributeValue={AttributeValue}", 
+            dto.ProductId, dto.AttributeName, dto.AttributeValue);
+        
+        var result = await service.CreateAsync(dto, cancellationToken);
+        if (!result.Success)
+        {
+            // Reload products for dropdown
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                    ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+                logger.LogError(ex, "Exception while reloading products");
+            }
+            
+            var errorMessage = result.Error?.Message ?? "Error creating product attribute";
+            ModelState.AddModelError("", errorMessage);
+            logger.LogError("Failed to create product attribute: {Error}. ProductId={ProductId}, AttributeName={AttributeName}", 
+                errorMessage, dto.ProductId, dto.AttributeName);
+            return View(dto);
+        }
+
+        logger.LogInformation("Product attribute created successfully: ProductId={ProductId}, AttributeName={AttributeName}", 
+            dto.ProductId, dto.AttributeName);
         TempData["SuccessMessage"] = "Product attribute created successfully!";
         return RedirectToAction(nameof(Index));
     }

@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PRN232_WebClient_Tachonogy.ApiClients;
 using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Controllers;
 
-public class ProductVariantController(IProductVariantService service, ILogger<ProductVariantController> logger) : Controller
+public class ProductVariantController(
+    IProductVariantService service,
+    IProductService productService,
+    ODataApiClient odataApiClient,
+    ILogger<ProductVariantController> logger) : Controller
 {
     [HttpGet]
     [AllowAnonymous]
@@ -17,7 +22,7 @@ public class ProductVariantController(IProductVariantService service, ILogger<Pr
             ProductId = productId,
             PageIndex = page,
             PageSize = pageSize,
-            OrderBy = "CreatedAt",
+            OrderBy = "Id",
             Descending = false
         };
 
@@ -34,31 +39,160 @@ public class ProductVariantController(IProductVariantService service, ILogger<Pr
         return View(new PagedResult<ProductVariantDto>([], 0, 0, 0));
     }
 
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     [HttpGet]
-    public IActionResult Create() => View();
+    public async Task<IActionResult> Create(Guid? productId, CancellationToken cancellationToken = default)
+    {
+        // Load all products for dropdown using REST API
+        try
+        {
+            var productsResult = await productService.GetAllAsync(cancellationToken);
+            
+            if (productsResult.Success && productsResult.Data != null)
+            {
+                ViewBag.Products = productsResult.Data.ToList();
+                logger.LogInformation("Loaded {Count} products for dropdown", productsResult.Data.Count);
+            }
+            else
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products. Please try again.";
+                logger.LogWarning("Failed to load products: {Error}", productsResult.Error?.Message ?? "Unknown error");
+            }
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Products = new List<ProductDto>();
+            ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+            logger.LogError(ex, "Exception while loading products for dropdown");
+        }
 
-    [Authorize(Roles = "Admin")]
+        if (productId.HasValue)
+        {
+            ViewBag.ProductId = productId.Value;
+        }
+        return View();
+    }
+
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductVariantRequest dto, CancellationToken cancellationToken)
     {
+        // Validate ProductId
+        if (dto.ProductId == Guid.Empty)
+        {
+            ModelState.AddModelError("ProductId", "Please select a product.");
+        }
+        
+        // Reload products for dropdown if validation fails
         if (!ModelState.IsValid)
-            return View(dto);
-
-        dto = dto with
         {
-            VariantName = dto.VariantName?.Trim() ?? "",
-            Sku = dto.Sku?.Trim(),
-            ImageUrl = dto.ImageUrl?.Trim()
-        };
-
-        var result = await service.CreateAsync(dto, cancellationToken);
-        if (!result.Success)
-        {
-            ModelState.AddModelError("", result.Error?.Message ?? "Error creating product variant");
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                    ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+                logger.LogError(ex, "Exception while reloading products");
+            }
             return View(dto);
         }
 
+        // Trim and validate input
+        dto = dto with
+        {
+            VariantName = dto.VariantName?.Trim() ?? "",
+            Sku = string.IsNullOrWhiteSpace(dto.Sku) ? null : dto.Sku.Trim(),
+            ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim()
+        };
+        
+        // Validate ImageUrl format if provided
+        if (!string.IsNullOrWhiteSpace(dto.ImageUrl) && !Uri.IsWellFormedUriString(dto.ImageUrl, UriKind.Absolute))
+        {
+            ModelState.AddModelError("ImageUrl", "Invalid image URL format");
+        }
+        
+        // Re-validate after trimming
+        if (string.IsNullOrWhiteSpace(dto.VariantName))
+        {
+            ModelState.AddModelError("VariantName", "Variant name is required");
+        }
+        
+        if (dto.Price <= 0)
+        {
+            ModelState.AddModelError("Price", "Price must be greater than 0");
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            // Reload products for dropdown
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                }
+            }
+            catch
+            {
+                ViewBag.Products = new List<ProductDto>();
+            }
+            return View(dto);
+        }
+
+        logger.LogInformation("Creating product variant: ProductId={ProductId}, VariantName={VariantName}, Price={Price}", 
+            dto.ProductId, dto.VariantName, dto.Price);
+        
+        var result = await service.CreateAsync(dto, cancellationToken);
+        if (!result.Success)
+        {
+            // Reload products for dropdown
+            try
+            {
+                var productsResult = await productService.GetAllAsync(cancellationToken);
+                if (productsResult.Success && productsResult.Data != null)
+                {
+                    ViewBag.Products = productsResult.Data.ToList();
+                }
+                else
+                {
+                    ViewBag.Products = new List<ProductDto>();
+                    ViewBag.ErrorMessage = productsResult.Error?.Message ?? "Failed to load products.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Products = new List<ProductDto>();
+                ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
+                logger.LogError(ex, "Exception while reloading products");
+            }
+            
+            var errorMessage = result.Error?.Message ?? "Error creating product variant";
+            ModelState.AddModelError("", errorMessage);
+            logger.LogError("Failed to create product variant: {Error}. ProductId={ProductId}, VariantName={VariantName}", 
+                errorMessage, dto.ProductId, dto.VariantName);
+            return View(dto);
+        }
+
+        logger.LogInformation("Product variant created successfully: ProductId={ProductId}, VariantName={VariantName}", 
+            dto.ProductId, dto.VariantName);
         TempData["SuccessMessage"] = "Product variant created successfully!";
         return RedirectToAction(nameof(Index));
     }

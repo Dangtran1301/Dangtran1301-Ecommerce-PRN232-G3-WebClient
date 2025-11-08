@@ -17,7 +17,6 @@ public record CreateProductRequest
     [StringLength(255)]
     public string? Sku { get; set; }
 
-    [Url(ErrorMessage = "Invalid image URL format")]
     public string? ImageUrl { get; set; }
 
     public string? Specifications { get; set; }
@@ -27,6 +26,47 @@ public record CreateProductRequest
 
     [Required(ErrorMessage = "Category is required")]
     public Guid CategoryId { get; set; }
+
+    // Selected Variant IDs to associate with the product (existing variants)
+    public List<Guid>? SelectedVariantIds { get; set; }
+
+    // Selected Attribute IDs to associate with the product (existing attributes)
+    public List<Guid>? SelectedAttributeIds { get; set; }
+
+    // Stock information to create along with the product
+    public CreateStockInlineRequest? Stock { get; set; }
+}
+
+public record CreateStockInlineRequest
+{
+    public int Quantity { get; set; } = 0;
+
+    [StringLength(255)]
+    public string? Location { get; set; }
+}
+
+public record CreateProductVariantInlineRequest
+{
+    [StringLength(255)]
+    public string? VariantName { get; set; }
+
+    [Range(0.01, double.MaxValue)]
+    public decimal? Price { get; set; }
+    
+    [StringLength(255)]
+    public string? Sku { get; set; }
+    
+    [Url(ErrorMessage = "Invalid image URL format")]
+    public string? ImageUrl { get; set; }
+}
+
+public record CreateProductAttributeInlineRequest
+{
+    [StringLength(255)]
+    public string? AttributeName { get; set; }
+    
+    [StringLength(500)]
+    public string? AttributeValue { get; set; }
 }
 
 public record ProductDto
@@ -69,6 +109,23 @@ public record UpdateProductRequest
 
     [Required]
     public Guid CategoryId { get; set; }
+
+    // Selected Variant IDs to associate with the product (existing variants)
+    public List<Guid>? SelectedVariantIds { get; set; }
+
+    // Selected Attribute IDs to associate with the product (existing attributes)
+    public List<Guid>? SelectedAttributeIds { get; set; }
+
+    // Stock information to update along with the product
+    public UpdateStockInlineRequest? Stock { get; set; }
+}
+
+public record UpdateStockInlineRequest
+{
+    public int Quantity { get; set; } = 0;
+
+    [StringLength(255)]
+    public string? Location { get; set; }
 }
 
 public class ProductFilterDto

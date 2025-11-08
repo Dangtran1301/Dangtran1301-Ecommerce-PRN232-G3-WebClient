@@ -5,7 +5,7 @@ namespace PRN232_WebClient_Tachonogy.ApiClients;
 
 public class StockApiClient : IStockApiClient
 {
-    private const string BaseUrl = "odata/ODataStockDto";
+    private const string BaseUrl = "odata/ODataStocks";
     private readonly IApiClient apiClient;
     private readonly ODataApiClient odataClient;
 
@@ -22,8 +22,12 @@ public class StockApiClient : IStockApiClient
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
         
-        var orderByClause = $"{filter.OrderBy} {(filter.Descending ? "desc" : "asc")}";
-        queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
+        // Only add $orderby if OrderBy is specified
+        if (!string.IsNullOrWhiteSpace(filter.OrderBy))
+        {
+            var orderByClause = $"{filter.OrderBy} {(filter.Descending ? "desc" : "asc")}";
+            queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
+        }
         
         var filterParts = new List<string>();
         

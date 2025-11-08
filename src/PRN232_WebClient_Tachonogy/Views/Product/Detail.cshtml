@@ -4,87 +4,613 @@
     ViewData["Title"] = "Product Details";
 }
 
-<div class="container py-4">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="product-details-page">
+    <div class="product-header">
+        <a asp-action="Index" class="btn-back">
+            <i class="fas fa-arrow-left me-2"></i>Back to Products
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success-custom">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-danger-custom">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="product-details-container">
+        <div class="product-main-card">
+            <div class="product-image-section">
                 @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
-                    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.ProductName" 
-                         style="height: 500px; object-fit: contain; background-color: #f8f9fa;"
-                         onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'">
+                    <div class="product-image-wrapper">
+                        <img src="@Model.ImageUrl" alt="@Model.ProductName" class="product-main-image" 
+                             onerror="this.src='https://via.placeholder.com/500x500?text=No+Image'" />
+                        <div class="image-overlay"></div>
+                    </div>
                 }
                 else
                 {
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 500px;">
-                        <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                    <div class="product-image-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>No Image Available</p>
                     </div>
                 }
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h1 class="card-title fw-bold text-primary mb-3">@Model.ProductName</h1>
-                    
-                    <div class="mb-3">
-                        <span class="badge bg-primary fs-6 me-2">@Model.BrandName</span>
-                        <span class="badge bg-secondary fs-6">@Model.CategoryName</span>
-                    </div>
 
-                    <div class="mb-4">
-                        <h2 class="text-success fw-bold mb-0">$@Model.Price.ToString("N2")</h2>
-                        @if (!string.IsNullOrEmpty(Model.Sku))
-                        {
-                            <small class="text-muted">SKU: @Model.Sku</small>
-                        }
+            <div class="product-info-section">
+                <div class="product-badge">
+                    <i class="fas fa-tag me-2"></i>@Model.CategoryName
+                </div>
+                <h1 class="product-title">@Model.ProductName</h1>
+                
+                <div class="product-price-section">
+                    <div class="price-main">
+                        <span class="price-amount">@Model.Price.ToString("N2")</span>
+                        <span class="price-currency">USD</span>
                     </div>
+                </div>
 
-                    @if (!string.IsNullOrEmpty(Model.Description))
-                    {
-                        <div class="mb-4">
-                            <h5 class="fw-semibold">Description</h5>
-                            <p class="text-muted">@Model.Description</p>
+                <div class="product-details-grid">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-building"></i>
                         </div>
-                    }
+                        <div class="detail-content">
+                            <div class="detail-label">Brand</div>
+                            <div class="detail-value">@Model.BrandName</div>
+                        </div>
+                    </div>
 
-                    @if (!string.IsNullOrEmpty(Model.Specifications))
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Category</div>
+                            <div class="detail-value">@Model.CategoryName</div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Sku))
                     {
-                        <div class="mb-4">
-                            <h5 class="fw-semibold">Specifications</h5>
-                            <div class="text-muted">
-                                @Html.Raw(Model.Specifications.Replace("\n", "<br/>"))
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-barcode"></i>
+                            </div>
+                            <div class="detail-content">
+                                <div class="detail-label">SKU</div>
+                                <div class="detail-value">@Model.Sku</div>
                             </div>
                         </div>
                     }
+                </div>
 
-                    <div class="d-grid gap-2 mt-4">
-                        <button class="btn btn-primary btn-lg">
-                            <i class="bi bi-cart-plus me-2"></i>Add to Cart
-                        </button>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <div class="btn-group">
-                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                                    <i class="bi bi-pencil me-1"></i> Edit
-                                </a>
-                                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
-                                      onsubmit="return confirm('Delete product: @Model.ProductName?');">
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-trash me-1"></i> Delete
-                                    </button>
-                                </form>
-                            </div>
-                        }
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Products
-                        </a>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="product-description-section">
+                        <h3 class="section-title-sm">
+                            <i class="fas fa-align-left me-2"></i>Description
+                        </h3>
+                        <p class="description-text">@Model.Description</p>
                     </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Specifications))
+                {
+                    <div class="product-description-section">
+                        <h3 class="section-title-sm">
+                            <i class="fas fa-list-ul me-2"></i>Specifications
+                        </h3>
+                        <div class="description-text">
+                            @Html.Raw(Model.Specifications.Replace("\n", "<br/>"))
+                        </div>
+                    </div>
+                }
+
+                @{
+                    var productVariants = ViewBag.ProductVariants as List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto>();
+                    var productAttributes = ViewBag.ProductAttributes as List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+                    var stock = ViewBag.Stock as PRN232_WebClient_Tachonogy.DTOs.StockDto;
+                }
+
+                @if (productVariants.Any())
+                {
+                    <div class="product-description-section">
+                        <h3 class="section-title-sm">
+                            <i class="fas fa-layer-group me-2"></i>Product Variants
+                        </h3>
+                        <div class="variants-list">
+                            @foreach (var variant in productVariants)
+                            {
+                                <div class="variant-item">
+                                    <div class="variant-name">@variant.VariantName</div>
+                                    <div class="variant-details">
+                                        <span class="variant-price">$@variant.Price.ToString("N2")</span>
+                                        @if (!string.IsNullOrEmpty(variant.Sku))
+                                        {
+                                            <span class="variant-sku">SKU: @variant.Sku</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (productAttributes.Any())
+                {
+                    <div class="product-description-section">
+                        <h3 class="section-title-sm">
+                            <i class="fas fa-tags me-2"></i>Product Attributes
+                        </h3>
+                        <div class="attributes-list">
+                            @foreach (var attr in productAttributes)
+                            {
+                                <div class="attribute-item">
+                                    <span class="attribute-name">@(attr.AttributeName):</span>
+                                    <span class="attribute-value">@(attr.AttributeValue)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (stock != null)
+                {
+                    <div class="product-description-section">
+                        <h3 class="section-title-sm">
+                            <i class="fas fa-warehouse me-2"></i>Stock Information
+                        </h3>
+                        <div class="stock-info">
+                            <div class="stock-item">
+                                <span class="stock-label">Available Quantity:</span>
+                                <span class="stock-value @(stock.Quantity > 0 ? "in-stock" : "out-of-stock")">
+                                    @stock.Quantity units
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(stock.Location))
+                            {
+                                <div class="stock-item">
+                                    <span class="stock-label">Location:</span>
+                                    <span class="stock-value">@stock.Location</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="product-actions">
+                    <button class="btn-rent-now" onclick="alert('Add to cart functionality coming soon!')">
+                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                    </button>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-action-admin btn-edit">
+                        <i class="fas fa-edit me-2"></i>Edit
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .product-details-page {
+        padding: 2rem 0;
+        min-height: 100vh;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        font-family: 'Inter', sans-serif;
+    }
 
+    .product-header {
+        margin-bottom: 2rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-back:hover {
+        background: #667eea;
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    .alert-success-custom {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .alert-danger-custom {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+    }
+
+    .product-details-container {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .product-main-card {
+        background: white;
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+    }
+
+    .product-image-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .product-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-image-wrapper:hover .product-main-image {
+        transform: scale(1.05);
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-image-wrapper:hover .image-overlay {
+        opacity: 1;
+    }
+
+    .product-image-placeholder {
+        text-align: center;
+        color: white;
+        opacity: 0.7;
+    }
+
+    .product-image-placeholder i {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+
+    .product-info-section {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        width: fit-content;
+    }
+
+    .product-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.2;
+    }
+
+    .product-price-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+    }
+
+    .price-main {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .price-currency {
+        font-size: 1.2rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .product-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+    }
+
+    .detail-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .detail-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+    }
+
+    .detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .product-description-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title-sm {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .description-text {
+        color: #6c757d;
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: auto;
+    }
+
+    .btn-rent-now {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-rent-now:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    .btn-action-admin {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
+        color: white;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.5);
+        color: white;
+    }
+
+    @@media (max-width: 968px) {
+        .product-main-card {
+            grid-template-columns: 1fr;
+        }
+
+        .product-image-section {
+            min-height: 300px;
+        }
+
+        .product-details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .variants-list, .attributes-list, .stock-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .variant-item, .attribute-item, .stock-item {
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .variant-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+
+    .variant-details {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .variant-price {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+
+    .variant-sku {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .attribute-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .attribute-value {
+        color: #6c757d;
+    }
+
+    .stock-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .stock-value {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .stock-value.in-stock {
+        color: #10b981;
+    }
+
+    .stock-value.out-of-stock {
+        color: #ef4444;
+    }
+
+    @@media (max-width: 768px) {
+        .product-details-page {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .product-info-section {
+            padding: 2rem;
+        }
+
+        .product-title {
+            font-size: 2rem;
+        }
+
+        .variant-item, .attribute-item, .stock-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>

@@ -11,6 +11,11 @@ public class ProductService(IProductApiClient productApiClient, ILogger<ProductS
         return await productApiClient.FilterAsync(filter, cancellationToken);
     }
 
+    public async Task<ApiResponse<IReadOnlyList<ProductDto>>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await productApiClient.GetAllAsync(cancellationToken);
+    }
+
     public async Task<ApiResponse<ProductDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await productApiClient.GetByIdAsync(id, cancellationToken);

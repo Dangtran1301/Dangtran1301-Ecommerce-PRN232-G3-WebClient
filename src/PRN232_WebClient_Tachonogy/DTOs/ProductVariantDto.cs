@@ -15,7 +15,6 @@ public record CreateProductVariantRequest
 
     public string? Sku { get; set; }
 
-    [Url]
     public string? ImageUrl { get; set; }
 }
 
@@ -39,7 +38,6 @@ public record UpdateProductVariantRequest
 
     public string? Sku { get; set; }
     
-    [Url]
     public string? ImageUrl { get; set; }
 }
 
@@ -49,7 +47,7 @@ public class ProductVariantFilterDto
     public Guid? ProductId { get; set; }
     public int? PageIndex { get; set; } = 1;
     public int? PageSize { get; set; } = 25;
-    public string? OrderBy { get; set; } = "CreatedAt";
+    public string? OrderBy { get; set; } = "Id";
     public bool Descending { get; set; } = false;
 }
 

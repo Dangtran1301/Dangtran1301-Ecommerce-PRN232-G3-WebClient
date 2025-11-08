@@ -5,7 +5,10 @@ using PRN232_WebClient_Tachonogy.Services.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Controllers;
 
-public class StockController(IStockService service, ILogger<StockController> logger) : Controller
+public class StockController(
+    IStockService service,
+    IProductService productService,
+    ILogger<StockController> logger) : Controller
 {
     [HttpGet]
     [AllowAnonymous]
@@ -17,7 +20,7 @@ public class StockController(IStockService service, ILogger<StockController> log
             Location = location,
             PageIndex = page,
             PageSize = pageSize,
-            OrderBy = "CreatedAt",
+            OrderBy = "Quantity",
             Descending = false
         };
 
@@ -27,6 +30,25 @@ public class StockController(IStockService service, ILogger<StockController> log
         ViewBag.Page = page;
         ViewBag.MaxPage = result.Data?.TotalPages ?? 1;
 
+        // Load product information for each stock
+        var stocksWithProducts = new List<(StockDto Stock, ProductDto? Product)>();
+        if (result.Success && result.Data != null)
+        {
+            foreach (var stock in result.Data.Items)
+            {
+                try
+                {
+                    var productResult = await productService.GetByIdAsync(stock.ProductId, cancellationToken);
+                    stocksWithProducts.Add((stock, productResult.Success ? productResult.Data : null));
+                }
+                catch
+                {
+                    stocksWithProducts.Add((stock, null));
+                }
+            }
+        }
+        ViewBag.StocksWithProducts = stocksWithProducts;
+
         if (result.Success)
             return View(result.Data);
 
@@ -34,11 +56,18 @@ public class StockController(IStockService service, ILogger<StockController> log
         return View(new PagedResult<StockDto>([], 0, 0, 0));
     }
 
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     [HttpGet]
-    public IActionResult Create() => View();
+    public IActionResult Create(Guid? productId)
+    {
+        if (productId.HasValue)
+        {
+            ViewBag.ProductId = productId.Value;
+        }
+        return View();
+    }
 
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Create(CreateStockRequest dto, CancellationToken cancellationToken)
     {
@@ -96,7 +125,33 @@ public class StockController(IStockService service, ILogger<StockController> log
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> UpdateQuantity(Guid id, int quantity, CancellationToken cancellationToken = default)
+    {
+        var stock = await service.GetByIdAsync(id, cancellationToken);
+        if (!stock.Success || stock.Data == null)
+        {
+            return Json(new { success = false, message = "Stock not found" });
+        }
+
+        var updateRequest = new UpdateStockRequest
+        {
+            Quantity = quantity,
+            Location = stock.Data.Location
+        };
+
+        var result = await service.UpdateAsync(id, updateRequest, cancellationToken);
+        if (!result.Success)
+        {
+            return Json(new { success = false, message = result.Error?.Message ?? "Error updating stock" });
+        }
+
+        return Json(new { success = true, message = "Quantity updated successfully", newQuantity = quantity });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);

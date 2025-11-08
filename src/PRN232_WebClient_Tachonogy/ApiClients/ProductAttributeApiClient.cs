@@ -22,7 +22,16 @@ public class ProductAttributeApiClient : IProductAttributeApiClient
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
         
-        var orderByClause = $"{filter.OrderBy} {(filter.Descending ? "desc" : "asc")}";
+        // Validate and set OrderBy field
+        var orderByField = !string.IsNullOrWhiteSpace(filter.OrderBy) ? filter.OrderBy.Trim() : "Id";
+        // ProductAttributeDto has: Id, ProductId, AttributeName, AttributeValue
+        var validOrderByFields = new[] { "Id", "AttributeName", "AttributeValue", "ProductId" };
+        if (!validOrderByFields.Contains(orderByField, StringComparer.OrdinalIgnoreCase))
+        {
+            orderByField = "Id"; // Fallback to Id if invalid field
+        }
+        
+        var orderByClause = $"{orderByField} {(filter.Descending ? "desc" : "asc")}";
         queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
         
         var filterParts = new List<string>();

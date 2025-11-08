@@ -37,7 +37,7 @@ public class ProductAttributeFilterDto
     public Guid? ProductId { get; set; }
     public int? PageIndex { get; set; } = 1;
     public int? PageSize { get; set; } = 25;
-    public string? OrderBy { get; set; } = "CreatedAt";
+    public string? OrderBy { get; set; } = "Id";
     public bool Descending { get; set; } = false;
 }
 

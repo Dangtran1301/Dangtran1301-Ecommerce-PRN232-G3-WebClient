@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Stock";
+    var productId = ViewBag.ProductId as Guid?;
 }
 
 <div class="container py-4">
@@ -11,11 +12,23 @@
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 
-                <div class="mb-3">
-                    <label asp-for="ProductId" class="form-label"></label>
-                    <input asp-for="ProductId" class="form-control" />
-                    <span asp-validation-for="ProductId" class="text-danger"></span>
-                </div>
+                @if (productId.HasValue)
+                {
+                    <input type="hidden" name="ProductId" id="ProductId" value="@(productId.Value)" />
+                    <div class="mb-3">
+                        <label class="form-label">Product ID</label>
+                        <input type="text" class="form-control" value="@(productId.Value)" readonly />
+                        <small class="text-muted">This stock will be associated with the selected product.</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label asp-for="ProductId" class="form-label"></label>
+                        <input asp-for="ProductId" class="form-control" />
+                        <span asp-validation-for="ProductId" class="text-danger"></span>
+                    </div>
+                }
 
                 <div class="mb-3">
                     <label asp-for="Quantity" class="form-label"></label>

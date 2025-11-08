@@ -22,7 +22,19 @@ public class ProductApiClient : IProductApiClient
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
         
-        var orderByClause = $"{filter.OrderBy} {(filter.Descending ? "desc" : "asc")}";
+        // Only add $orderby if OrderBy is specified and not empty
+        // Use Id as default orderby for OData compatibility (always available in DTO)
+        var orderByField = !string.IsNullOrWhiteSpace(filter.OrderBy) ? filter.OrderBy.Trim() : "Id";
+        
+        // Validate orderBy field - only allow fields that exist in ProductDto
+        // ProductDto has: Id, ProductName, Description, Price, Sku, ImageUrl, Specifications, BrandId, BrandName, CategoryId, CategoryName
+        var validOrderByFields = new[] { "Id", "ProductName", "Price", "BrandId", "CategoryId" };
+        if (!validOrderByFields.Contains(orderByField, StringComparer.OrdinalIgnoreCase))
+        {
+            orderByField = "Id"; // Fallback to Id if invalid field
+        }
+        
+        var orderByClause = $"{orderByField} {(filter.Descending ? "desc" : "asc")}";
         queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
         
         var filterParts = new List<string>();
@@ -64,6 +76,9 @@ public class ProductApiClient : IProductApiClient
             Data = paged
         };
     }
+
+    public Task<ApiResponse<IReadOnlyList<ProductDto>>> GetAllAsync(CancellationToken cancellationToken = default)
+        => apiClient.GetAsync<IReadOnlyList<ProductDto>>("api/v1/catalog/products", cancellationToken);
 
     public Task<ApiResponse<ProductDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => apiClient.GetAsync<ProductDto>($"api/v1/catalog/products/{id}", cancellationToken);
