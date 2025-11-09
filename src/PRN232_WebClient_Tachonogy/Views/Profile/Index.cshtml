@@ -1,0 +1,48 @@
+﻿@model PRN232_WebClient_Tachonogy.DTOs.UserProfileDto
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">My Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="@(!string.IsNullOrEmpty(Model.Avatar) ? Model.Avatar : "https://i.pinimg.com/736x/8f/1c/a2/8f1ca2029e2efceebd22fa05cca423d7.jpg")"
+                             class="rounded-circle border shadow-sm" style="width:120px; height:120px; object-fit:cover;" />
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Full Name</dt>
+                        <dd class="col-sm-8">@Model.FullName</dd>
+
+                        <dt class="col-sm-4">Phone Number</dt>
+                        <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-4">Gender</dt>
+                        <dd class="col-sm-8">@Model.Gender</dd>
+
+                        <dt class="col-sm-4">Date of Birth</dt>
+                        <dd class="col-sm-8">@Model.DayOfBirth?.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">@Model.Address</dd>
+                    </dl>
+
+                    <div class="text-center mt-4">
+                        <a asp-action="Edit" class="btn btn-warning px-4">
+                            <i class="bi bi-pencil-square"></i> Edit Profile
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary px-4 ms-2">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

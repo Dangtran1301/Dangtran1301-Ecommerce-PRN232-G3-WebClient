@@ -1,0 +1,51 @@
+﻿@model PRN232_WebClient_Tachonogy.DTOs.AuthUserResponse
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = "_Layout";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Edit User</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="mb-3">
+            <label asp-for="UserName" class="form-label"></label>
+            <input asp-for="UserName" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select asp-for="Role" class="form-select">
+                <option value="User">User</option>
+                <option value="Seller">Seller</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select asp-for="AccountStatus" class="form-select">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,26 @@
+@model PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto
+
+@{
+    ViewData["Title"] = "Product Attribute Details";
+}
+
+<div class="container py-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Attribute Name:</dt>
+                <dd class="col-sm-9">@Model.AttributeName</dd>
+
+                <dt class="col-sm-3">Attribute Value:</dt>
+                <dd class="col-sm-9">@Model.AttributeValue</dd>
+
+                <dt class="col-sm-3">Product ID:</dt>
+                <dd class="col-sm-9">@Model.ProductId</dd>
+            </dl>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>
+
+
