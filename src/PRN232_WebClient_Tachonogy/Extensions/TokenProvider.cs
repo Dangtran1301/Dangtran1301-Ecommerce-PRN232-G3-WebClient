@@ -1,26 +1,41 @@
-﻿using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
+﻿using System.Security.Claims;
+using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Extensions;
 
 public class TokenProvider(IHttpContextAccessor accessor) : ITokenProvider
 {
-    private HttpResponse? Response => accessor.HttpContext?.Response;
-    private HttpRequest? Request => accessor.HttpContext?.Request;
 
-    public string? AccessToken => Request?.Cookies["AccessToken"];
-    public string? RefreshToken => Request?.Cookies["RefreshToken"];
+    private readonly ISession? Session = accessor.HttpContext?.Session;
+
+    public string? AccessToken => Session?.GetString("AccessToken");
+    public string? RefreshToken => Session?.GetString("RefreshToken");
+
+    public bool IsAuthenticated => accessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+
+    public Guid GetUserId()
+    {
+        var idClaim = accessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(idClaim?.Value, out var id) ? id : Guid.Empty;
+    }
+
+    public string? GetUserRole() =>
+        accessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
 
     public void SetTokens(string accessToken, string refreshToken)
     {
-        Response?.Cookies.Append("AccessToken", accessToken, new CookieOptions
+        var response = accessor.HttpContext?.Response;
+        if (response == null) return;
+
+        response.Cookies.Append("AccessToken", accessToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
+            Expires = DateTimeOffset.UtcNow.AddMinutes(10)
         });
 
-        Response?.Cookies.Append("RefreshToken", refreshToken, new CookieOptions
+        response.Cookies.Append("RefreshToken", refreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -31,7 +46,8 @@ public class TokenProvider(IHttpContextAccessor accessor) : ITokenProvider
 
     public void ClearTokens()
     {
-        Response?.Cookies.Delete("AccessToken");
-        Response?.Cookies.Delete("RefreshToken");
+        var response = accessor.HttpContext?.Response;
+        response?.Cookies.Delete("AccessToken");
+        response?.Cookies.Delete("RefreshToken");
     }
 }

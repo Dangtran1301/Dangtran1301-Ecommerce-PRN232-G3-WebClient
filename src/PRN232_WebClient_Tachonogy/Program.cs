@@ -1,12 +1,21 @@
+using PRN232_WebClient_Tachonogy.ApiClients;
+using PRN232_WebClient_Tachonogy.ApiClients.Interfaces;
 using PRN232_WebClient_Tachonogy.Extensions;
 using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
+using PRN232_WebClient_Tachonogy.Middlewares;
 using PRN232_WebClient_Tachonogy.Services;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
 using System.Net.Http.Headers;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
+
+configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAuthentication("CookieAuth")
@@ -17,6 +26,12 @@ builder.Services.AddAuthentication("CookieAuth")
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
         options.SlidingExpiration = true;
     });
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromHours(1);
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
@@ -33,6 +48,11 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
+builder.Services.AddHttpClient<IAdminClient, AdminClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+});
 builder.Services.AddHttpClient<ODataApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
@@ -40,12 +60,22 @@ builder.Services.AddHttpClient<ODataApiClient>(client =>
 });
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IBrandApiClient, BrandApiClient>();
-builder.Services.AddScoped<IUserApiClient, UserApiClient>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserProfileApiClient, UserProfileApiClient>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IAdminClient, AdminClient>();
 builder.Services.AddScoped<ICategoryApiClient, CategoryApiClient>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderApiClient, OrderApiClient>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IProductApiClient, ProductApiClient>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductAttributeApiClient, ProductAttributeApiClient>();
+builder.Services.AddScoped<IProductAttributeService, ProductAttributeService>();
+builder.Services.AddScoped<IProductVariantApiClient, ProductVariantApiClient>();
+builder.Services.AddScoped<IProductVariantService, ProductVariantService>();
+builder.Services.AddScoped<IStockApiClient, StockApiClient>();
+builder.Services.AddScoped<IStockService, StockService>();
 
 var app = builder.Build();
 
@@ -54,12 +84,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

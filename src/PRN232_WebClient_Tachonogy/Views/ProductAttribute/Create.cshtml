@@ -1,0 +1,86 @@
+@model PRN232_WebClient_Tachonogy.DTOs.CreateProductAttributeRequest
+
+@{
+    ViewData["Title"] = "Create Product Attribute";
+    var productId = ViewBag.ProductId as Guid?;
+}
+
+<div class="container py-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                }
+                
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        @ViewBag.ErrorMessage
+                    </div>
+                }
+                
+                <div class="mb-3">
+                    <label asp-for="ProductId" class="form-label fw-semibold">Product <span class="text-danger">*</span></label>
+                    @{
+                        var products = ViewBag.Products as List<PRN232_WebClient_Tachonogy.DTOs.ProductDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductDto>();
+                    }
+                    @if (products.Any())
+                    {
+                        <select asp-for="ProductId" class="form-select" required>
+                            <option value="">-- Select Product --</option>
+                            @foreach (var product in products.OrderBy(p => p.ProductName))
+                            {
+                                var displayName = !string.IsNullOrEmpty(product.ProductName) 
+                                    ? product.ProductName 
+                                    : "Unnamed Product";
+                                var brandInfo = !string.IsNullOrEmpty(product.BrandName) ? product.BrandName : "Unknown Brand";
+                                var categoryInfo = !string.IsNullOrEmpty(product.CategoryName) ? product.CategoryName : "Unknown Category";
+                                
+                                <option value="@product.Id" selected="@(productId.HasValue && productId.Value == product.Id)">
+                                    @displayName (@brandInfo - @categoryInfo)
+                                </option>
+                            }
+                        </select>
+                        <small class="text-muted">Select a product to associate this attribute with.</small>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>No products available.</strong> Please <a asp-controller="Product" asp-action="Create" class="alert-link">create a product first</a> before creating attributes.
+                        </div>
+                        <input type="hidden" asp-for="ProductId" value="@Guid.Empty" />
+                    }
+                    <span asp-validation-for="ProductId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AttributeName" class="form-label fw-semibold">Attribute Name <span class="text-danger">*</span></label>
+                    <input asp-for="AttributeName" class="form-control" placeholder="e.g., CPU, RAM, Screen Size" required />
+                    <span asp-validation-for="AttributeName" class="text-danger"></span>
+                    <small class="text-muted">Enter the attribute name (e.g., "CPU", "RAM", "Screen Size", "Storage")</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AttributeValue" class="form-label fw-semibold">Attribute Value <span class="text-danger">*</span></label>
+                    <input asp-for="AttributeValue" class="form-control" placeholder="e.g., Intel i7, 16GB, 15.6 inch" required />
+                    <span asp-validation-for="AttributeValue" class="text-danger"></span>
+                    <small class="text-muted">Enter the attribute value (e.g., "Intel i7", "16GB", "15.6 inch", "512GB SSD")</small>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
