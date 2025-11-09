@@ -44,6 +44,8 @@ builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryApiClient, CategoryApiClient>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IOrderApiClient, OrderApiClient>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 
