@@ -3,8 +3,6 @@
 @{
     ViewData["Title"] = "Products";
     var keyword = ViewBag.Keyword as string ?? "";
-    var brandId = ViewBag.BrandId as Guid?;
-    var categoryId = ViewBag.CategoryId as Guid?;
     var currentPage = ViewBag.Page ?? 1;
     var maxPage = ViewBag.MaxPage ?? 1;
     var orderBy = ViewBag.OrderBy as string ?? "ProductName";
@@ -13,8 +11,6 @@
     {
         descending = descValue;
     }
-    var brands = ViewBag.Brands as List<PRN232_WebClient_Tachonogy.DTOs.BrandDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.BrandDto>();
-    var categories = ViewBag.Categories as List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto>();
 }
 
 <!-- Font Awesome for icons -->
@@ -62,59 +58,57 @@
 
     /* Header and Filter Section */
     .header-filter-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.25rem;
-        padding-bottom: 0.625rem;
-        border-bottom: 0.125rem solid var(--gray-200);
-        flex-wrap: wrap;
-        gap: 0.625rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .search-filters {
         display: flex;
-        gap: 0.75rem;
+        gap: 0.5rem;
         align-items: center;
-        flex-wrap: nowrap;
-        min-width: min(31.25rem, 50vw);
+        flex-wrap: wrap;
+        width: 100%;
     }
 
     .search-box {
         position: relative;
         flex: 1;
-        min-width: 12.5rem;
+        min-width: 10rem;
     }
 
         .search-box input {
             width: 100%;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-            border: 0.125rem solid var(--gray-200);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
+            padding: 0.4rem 0.75rem 0.4rem 2rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
             transition: all 0.3s ease;
         }
 
             .search-box input:focus {
                 outline: none;
                 border-color: var(--primary-color);
-                box-shadow: 0 0 0 0.1875rem rgb(37 99 235 / 0.1);
+                box-shadow: 0 0 0 2px rgb(239 68 68 / 0.1);
             }
 
     .search-icon {
         position: absolute;
-        left: 0.75rem;
+        left: 0.6rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--gray-600);
+        font-size: 0.875rem;
     }
 
     .form-select {
-        padding: 0.5rem 1rem;
-        border: 0.125rem solid var(--gray-200);
-        border-radius: var(--radius);
-        font-size: 0.9rem;
-        min-width: 7.5rem;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid var(--gray-200);
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        min-width: 8rem;
         transition: all 0.3s ease;
         background: white;
     }
@@ -122,28 +116,77 @@
         .form-select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.1875rem rgb(37 99 235 / 0.1);
+            box-shadow: 0 0 0 2px rgb(239 68 68 / 0.1);
         }
 
-    .btn-add {
-        background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    .btn-filter {
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
         border: none;
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius);
+        background: var(--primary-color);
         color: white;
-        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+        .btn-filter:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+    .btn-clear {
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid var(--gray-300);
+        background: white;
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: all 0.3s ease;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+        gap: 0.4rem;
+    }
+
+        .btn-clear:hover {
+            background: var(--gray-100);
+            color: var(--gray-800);
+        }
+
+    .action-buttons-row {
+        display: flex;
         gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, var(--primary-color), #dc2626);
+        border: none;
+        padding: 0.5rem 0.875rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
         transition: all 0.3s ease;
-        box-shadow: var(--shadow-md);
-        font-size: 0.9rem;
+        font-size: 0.875rem;
     }
 
         .btn-add:hover {
-            transform: translateY(-0.125rem);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
             color: white;
         }
 
@@ -151,7 +194,8 @@
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-        gap: 1rem;
+        gap: 1.5rem;
+        padding: 1rem 0;
     }
 
     /* Responsive breakpoints */
@@ -188,26 +232,28 @@
     /* Product Card */
     .product-card {
         background: white;
-        border-radius: var(--radius);
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
         border: 0.0625rem solid var(--gray-200);
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        position: relative;
     }
 
         .product-card:hover {
-            transform: translateY(-0.125rem);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
         }
 
     /* Card Image */
     .card-image {
         position: relative;
-        height: 10rem;
+        height: 12rem;
         overflow: hidden;
-        background: var(--gray-50);
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     }
 
     .product-img {
@@ -444,23 +490,31 @@
         }
 
         .header-filter-section {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 1rem;
+            padding: 0.75rem;
         }
 
         .search-filters {
-            flex-direction: column;
-            min-width: unset;
+            gap: 0.4rem;
         }
 
         .search-box {
-            min-width: unset;
+            min-width: 100%;
         }
 
         .form-select {
-            min-width: unset;
-            width: 100%;
+            min-width: calc(50% - 0.2rem);
+            flex: 1;
+            width: auto;
+        }
+
+        .action-buttons-row {
+            gap: 0.4rem;
+        }
+
+        .btn-add {
+            flex: 1;
+            min-width: calc(50% - 0.2rem);
+            justify-content: center;
         }
 
         .btn-add {
@@ -646,79 +700,62 @@
 
     <!-- Header and Filter Section -->
     <div class="header-filter-section">
-        <form asp-action="Index" method="get" class="search-filters" id="searchForm" style="flex: 1;">
+        <form asp-action="Index" method="get" class="search-filters" id="searchForm">
             <div class="search-box">
-                <input type="text" name="keyword" id="keywordInput" value="@keyword" placeholder="Search products..." />
+                <input type="text" name="keyword" id="keywordInput" value="@keyword" placeholder="Search..." />
                 <i class="fas fa-search search-icon"></i>
             </div>
-            <select name="brandId" class="form-select" id="brandSelect">
-                <option value="">All Brands</option>
-                @foreach (var brand in brands)
-                {
-                    <option value="@(brand.Id)" selected="@(brandId.HasValue && brandId.Value == brand.Id)">@brand.BrandName</option>
-                }
-            </select>
-            <select name="categoryId" class="form-select" id="categorySelect">
-                <option value="">All Categories</option>
-                @foreach (var category in categories)
-                {
-                    <option value="@(category.Id)" selected="@(categoryId.HasValue && categoryId.Value == category.Id)">@category.CategoryName</option>
-                }
-            </select>
             <select name="sortBy" class="form-select" id="sortBySelect">
-                <option value="ProductName" selected="@(orderBy == "ProductName")">Sort by Name</option>
-                <option value="Price_ASC" selected="@(orderBy == "Price" && !descending)">Price: Low to High</option>
-                <option value="Price_DESC" selected="@(orderBy == "Price" && descending)">Price: High to Low</option>
+                <option value="ProductName" selected="@(orderBy == "ProductName")">Name</option>
+                <option value="Price_ASC" selected="@(orderBy == "Price" && !descending)">Price: Low</option>
+                <option value="Price_DESC" selected="@(orderBy == "Price" && descending)">Price: High</option>
             </select>
             <input type="hidden" name="orderBy" id="orderByInput" value="@orderBy" />
             <input type="hidden" name="descending" id="descendingInput" value="@(descending ? "true" : "false")" />
-            <button type="submit" class="btn btn-details" style="padding: 0.5rem 1rem;">
+            <button type="submit" class="btn-filter">
                 <i class="fas fa-search"></i> Filter
             </button>
-            @if (!string.IsNullOrEmpty(keyword) || brandId.HasValue || categoryId.HasValue || (orderBy == "Price"))
+            @if (!string.IsNullOrEmpty(keyword) || (orderBy == "Price"))
             {
-                <a asp-action="Index" class="btn btn-secondary" style="padding: 0.5rem 1rem; background: #64748b; color: white; border: none;">
+                <a asp-action="Index" class="btn-clear">
                     <i class="fas fa-times"></i> Clear
                 </a>
             }
         </form>
 
         <!-- Action buttons -->
-        <div class="header-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <div class="action-buttons-row">
             <a asp-action="Create" class="btn-add">
-                <i class="fas fa-plus"></i>
-                Add New Product
+                <i class="fas fa-plus"></i> Add Product
             </a>
             <a asp-controller="Stock" asp-action="Index" class="btn-add" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                <i class="fas fa-warehouse"></i>
-                Manager Stock
+                <i class="fas fa-warehouse"></i> Stock
             </a>
             <div class="dropdown" style="position: relative;">
                 <button class="btn-add" type="button" id="manageDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #10b981, #059669); cursor: pointer;">
-                    <i class="fas fa-cog"></i>
-                    Manage Variants & Attributes
-                    <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 0.5rem;"></i>
+                    <i class="fas fa-cog"></i> Manage
+                    <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 0.3rem;"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="manageDropdown" style="min-width: 250px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0;">
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="manageDropdown" style="min-width: 220px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.4rem 0;">
                     <li>
-                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.5rem 1rem;">
-                            <i class="fas fa-layer-group me-2"></i>Product Variants
+                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+                            <i class="fas fa-layer-group me-2"></i>Variants
                         </h6>
                     </li>
-                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Index" style="padding: 0.5rem 1rem;">
-                        <i class="fas fa-list me-2"></i>View All Variants</a></li>
-                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Create" style="padding: 0.5rem 1rem;">
-                        <i class="fas fa-plus me-2"></i>Create Variant</a></li>
-                    <li><hr class="dropdown-divider" style="margin: 0.5rem 0;"></li>
+                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Index" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                        <i class="fas fa-list me-2"></i>View All</a></li>
+                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Create" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                        <i class="fas fa-plus me-2"></i>Create</a></li>
+                    <li><hr class="dropdown-divider" style="margin: 0.4rem 0;"></li>
                     <li>
-                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.5rem 1rem;">
-                            <i class="fas fa-tags me-2"></i>Product Attributes
+                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.4rem 0.75rem; font-size: 0.8rem;">
+                            <i class="fas fa-tags me-2"></i>Attributes
                         </h6>
                     </li>
-                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Index" style="padding: 0.5rem 1rem;">
-                        <i class="fas fa-list me-2"></i>View All Attributes</a></li>
-                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Create" style="padding: 0.5rem 1rem;">
-                        <i class="fas fa-plus me-2"></i>Create Attribute</a></li>
+                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Index" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                        <i class="fas fa-list me-2"></i>View All</a></li>
+                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Create" style="padding: 0.4rem 0.75rem; font-size: 0.875rem;">
+                        <i class="fas fa-plus me-2"></i>Create</a></li>
                 </ul>
             </div>
         </div>
@@ -817,8 +854,6 @@
         <div class="pagination-section">
             <form id="pageForm" method="get" asp-action="Index" style="display: flex; align-items: center; gap: 0.5rem;">
                 <input type="hidden" name="keyword" value="@keyword" />
-                <input type="hidden" name="brandId" value="@brandId" />
-                <input type="hidden" name="categoryId" value="@categoryId" />
                 <input type="hidden" name="orderBy" value="@orderBy" />
                 <input type="hidden" name="pageSize" value="12" />
 

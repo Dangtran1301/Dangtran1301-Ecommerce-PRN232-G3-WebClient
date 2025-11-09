@@ -47,7 +47,7 @@ public class ProductController(
     }
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Index(string? keyword, Guid? brandId, Guid? categoryId, int page = 1, int pageSize = 12, string? sortBy = null, string orderBy = "ProductName", bool descending = false, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(string? keyword, int page = 1, int pageSize = 12, string? sortBy = null, string orderBy = "ProductName", bool descending = false, CancellationToken cancellationToken = default)
     {
         // Handle sortBy from dropdown (Price_ASC, Price_DESC, etc.)
         var actualOrderBy = orderBy;
@@ -75,8 +75,6 @@ public class ProductController(
         var filter = new ProductFilterDto
         {
             Keyword = keyword,
-            BrandId = brandId,
-            CategoryId = categoryId,
             PageIndex = page,
             PageSize = pageSize,
             OrderBy = actualOrderBy,
@@ -85,43 +83,10 @@ public class ProductController(
 
         var result = await productService.GetProductsAsync(filter, cancellationToken);
         ViewBag.Keyword = keyword;
-        ViewBag.BrandId = brandId;
-        ViewBag.CategoryId = categoryId;
         ViewBag.Page = page;
         ViewBag.MaxPage = result.Data?.TotalPages ?? 1;
         ViewBag.OrderBy = actualOrderBy;
         ViewBag.Descending = actualDescending;
-
-        // Get brands and categories for filters - handle errors gracefully
-        try
-        {
-            var brandsResult = await brandService.GetBrandsAsync(new BrandFilterDto 
-            { 
-                PageSize = 100,
-                OrderBy = "BrandName",
-                Descending = false
-            }, cancellationToken);
-            ViewBag.Brands = brandsResult.Data?.Items ?? new List<BrandDto>();
-        }
-        catch
-        {
-            ViewBag.Brands = new List<BrandDto>();
-        }
-
-        try
-        {
-            var categoriesResult = await categoryService.GetCategoriesAsync(new CategoryFilterDto 
-            { 
-                PageSize = 100,
-                OrderBy = "CategoryName",
-                Descending = false
-            }, cancellationToken);
-            ViewBag.Categories = categoriesResult.Data?.Items ?? new List<CategoryDto>();
-        }
-        catch
-        {
-            ViewBag.Categories = new List<CategoryDto>();
-        }
 
         if (result.Success)
             return View(result.Data);
