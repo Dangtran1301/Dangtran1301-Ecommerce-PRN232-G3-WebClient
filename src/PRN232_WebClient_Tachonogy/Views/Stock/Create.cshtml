@@ -3,48 +3,112 @@
 @{
     ViewData["Title"] = "Create Stock";
     var productId = ViewBag.ProductId as Guid?;
+    var products = ViewBag.Products as List<PRN232_WebClient_Tachonogy.DTOs.ProductDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductDto>();
+    var errorMessage = ViewBag.ErrorMessage as string;
 }
 
 <div class="container py-4">
-    <h2>@ViewData["Title"]</h2>
-    <div class="card">
-        <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-                
-                @if (productId.HasValue)
-                {
-                    <input type="hidden" name="ProductId" id="ProductId" value="@(productId.Value)" />
-                    <div class="mb-3">
-                        <label class="form-label">Product ID</label>
-                        <input type="text" class="form-control" value="@(productId.Value)" readonly />
-                        <small class="text-muted">This stock will be associated with the selected product.</small>
-                    </div>
-                }
-                else
-                {
-                    <div class="mb-3">
-                        <label asp-for="ProductId" class="form-label"></label>
-                        <input asp-for="ProductId" class="form-control" />
-                        <span asp-validation-for="ProductId" class="text-danger"></span>
-                    </div>
-                }
-
-                <div class="mb-3">
-                    <label asp-for="Quantity" class="form-label"></label>
-                    <input asp-for="Quantity" type="number" class="form-control" />
-                    <span asp-validation-for="Quantity" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]
+                    </h4>
                 </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>@errorMessage
+                            <br />
+                            <small>Please ensure products are available before creating stock.</small>
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <label asp-for="Location" class="form-label"></label>
-                    <input asp-for="Location" class="form-control" />
-                    <span asp-validation-for="Location" class="text-danger"></span>
+                    <form asp-action="Create" method="post">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="All" class="alert alert-danger"></div>
+                        }
+                        
+                        <div class="mb-3">
+                            <label asp-for="ProductId" class="form-label fw-bold">
+                                <i class="fas fa-box me-2"></i>Select Product <span class="text-danger">*</span>
+                            </label>
+                            @if (productId.HasValue)
+                            {
+                                <input type="hidden" asp-for="ProductId" value="@productId.Value" />
+                                var selectedProduct = products.FirstOrDefault(p => p.Id == productId.Value);
+                                var displayText = selectedProduct != null 
+                                    ? $"{selectedProduct.ProductName} {(string.IsNullOrEmpty(selectedProduct.BrandName) ? "" : $"({selectedProduct.BrandName})")}"
+                                    : productId.Value.ToString();
+                                <input type="text" class="form-control" value="@displayText" readonly />
+                                <small class="text-muted">This stock will be associated with the selected product.</small>
+                            }
+                            else
+                            {
+                                @if (products.Any())
+                                {
+                                    <select asp-for="ProductId" class="form-select" required>
+                                        <option value="">-- Select a Product --</option>
+                                        @foreach (var product in products)
+                                        {
+                                            var displayText = $"{product.ProductName}";
+                                            if (!string.IsNullOrEmpty(product.BrandName))
+                                            {
+                                                displayText += $" ({product.BrandName}";
+                                                if (!string.IsNullOrEmpty(product.CategoryName))
+                                                {
+                                                    displayText += $" - {product.CategoryName}";
+                                                }
+                                                displayText += ")";
+                                            }
+                                            <option value="@product.Id">@displayText</option>
+                                        }
+                                    </select>
+                                    <small class="text-muted">Select a product from the list to add stock.</small>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>No products available. 
+                                        <a asp-controller="Product" asp-action="Create" class="alert-link">Create a product first</a>.
+                                    </div>
+                                }
+                            }
+                            <span asp-validation-for="ProductId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Quantity" class="form-label fw-bold">
+                                <i class="fas fa-cubes me-2"></i>Quantity <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Quantity" type="number" class="form-control" min="0" step="1" required placeholder="Enter quantity" />
+                            <small class="text-muted">Enter the number of units in stock.</small>
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Location" class="form-label fw-bold">
+                                <i class="fas fa-map-marker-alt me-2"></i>Location
+                            </label>
+                            <input asp-for="Location" class="form-control" placeholder="Enter storage location (e.g., Warehouse A, Shelf B3)" />
+                            <small class="text-muted">Optional: Specify where the stock is stored.</small>
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Create Stock
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
-
-                <button type="submit" class="btn btn-success">Create</button>
-                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -52,5 +116,3 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-
-

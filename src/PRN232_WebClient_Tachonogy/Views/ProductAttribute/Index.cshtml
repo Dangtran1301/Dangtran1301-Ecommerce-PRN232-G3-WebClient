@@ -6,19 +6,173 @@
     var productId = ViewBag.ProductId as Guid?;
     var currentPage = ViewBag.Page ?? 1;
     var maxPage = ViewBag.MaxPage ?? 1;
+    var productsDict = ViewBag.ProductsDict as Dictionary<Guid, PRN232_WebClient_Tachonogy.DTOs.ProductDto> ?? new Dictionary<Guid, PRN232_WebClient_Tachonogy.DTOs.ProductDto>();
 }
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    .attribute-container {
+        margin-bottom: 1rem;
+    }
+
+    .product-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem 0.75rem 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .product-header:hover {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .product-name {
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+
+    .product-meta {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .attribute-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .btn-toggle {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .btn-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .attributes-list {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 0.75rem 0.75rem;
+        padding: 1rem;
+        display: none;
+    }
+
+    .attributes-list.show {
+        display: block;
+    }
+
+    .attribute-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.2s ease;
+    }
+
+    .attribute-item:last-child {
+        border-bottom: none;
+    }
+
+    .attribute-item:hover {
+        background: #f8fafc;
+    }
+
+    .attribute-details {
+        flex: 1;
+    }
+
+    .attribute-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .attribute-value {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .attribute-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.75rem;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+
+    .btn-edit {
+        background: #fbbf24;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #f59e0b;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+    }
+
+    .search-section {
+        background: white;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+    }
+</style>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary">
-            <i class="bi bi-tags me-2"></i>@ViewData["Title"]
+            <i class="fas fa-tags me-2"></i>@ViewData["Title"]
         </h2>
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-action="Create" class="btn btn-success">
-                <i class="bi bi-plus-lg me-1"></i> Add New
-            </a>
-        }
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Add New Attribute
+        </a>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -30,89 +184,162 @@
         <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]</div>
     }
 
-    <form asp-action="Index" method="get" class="mb-3">
-        <div class="row g-2">
-            <div class="col-md-4">
-                <input type="text" name="keyword" value="@keyword" class="form-control" placeholder="Search attributes...">
+    <!-- Search Section -->
+    <div class="search-section">
+        <form asp-action="Index" method="get">
+            <div class="row g-2">
+                <div class="col-md-10">
+                    <input type="text" name="keyword" value="@keyword" class="form-control" placeholder="Search attributes by name...">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
             </div>
-            <div class="col-md-4">
-                <input type="text" name="productId" value="@productId" class="form-control" placeholder="Product ID (optional)">
-            </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 
-    @if (Model == null || !Model.Items.Any())
+    @{
+        // Filter attributes by keyword first if provided
+        IEnumerable<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> filteredAttributes;
+        if (Model != null && Model.Items.Any())
+        {
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var keywordLower = keyword.ToLowerInvariant();
+                filteredAttributes = Model.Items.Where(a => {
+                    // Check attribute name or value
+                    var attributeMatches = (a.AttributeName != null && a.AttributeName.ToLowerInvariant().Contains(keywordLower)) ||
+                                          (a.AttributeValue != null && a.AttributeValue.ToLowerInvariant().Contains(keywordLower));
+                    
+                    // Check product name
+                    var product = productsDict.ContainsKey(a.ProductId) ? productsDict[a.ProductId] : null;
+                    var productMatches = product != null && product.ProductName != null && 
+                                        product.ProductName.ToLowerInvariant().Contains(keywordLower);
+                    
+                    return attributeMatches || productMatches;
+                });
+            }
+            else
+            {
+                filteredAttributes = Model.Items;
+            }
+        }
+        else
+        {
+            filteredAttributes = new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+        }
+
+        // Group by ProductId
+        var groupedAttributes = filteredAttributes
+            .GroupBy(a => a.ProductId)
+            .OrderBy(g => {
+                var product = productsDict.ContainsKey(g.Key) ? productsDict[g.Key] : null;
+                return product?.ProductName ?? g.Key.ToString();
+            })
+            .ToList();
+    }
+
+    @if (groupedAttributes == null || !groupedAttributes.Any())
     {
-        <div class="alert alert-info text-center">No product attributes found.</div>
+        <div class="empty-state">
+            <i class="fas fa-inbox fa-3x mb-3"></i>
+            <h4>No product attributes found</h4>
+            @if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                <p>No attributes match the search term "@keyword".</p>
+            }
+            else
+            {
+                <p>Start by creating a new attribute.</p>
+            }
+        </div>
     }
     else
     {
-        <div class="table-responsive shadow-sm rounded">
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Attribute Name</th>
-                        <th>Attribute Value</th>
-                        <th>Product ID</th>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <th class="text-center">Actions</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var attr in Model.Items)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@attr.AttributeName</td>
-                            <td>@attr.AttributeValue</td>
-                            <td><small class="text-muted">@attr.ProductId</small></td>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@attr.Id" class="btn btn-sm btn-outline-warning me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form asp-action="Delete" asp-route-id="@attr.Id" method="post" class="d-inline"
-                                          onsubmit="return confirm('Delete attribute?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
 
-        <!-- Pagination -->
-        <form id="pageForm" method="get" asp-action="Index" class="d-flex align-items-center mt-3">
-            <input type="hidden" name="keyword" value="@keyword" />
-            <input type="hidden" name="productId" value="@productId" />
-            <button type="button" class="btn btn-secondary me-2" onclick="changePage(-1)">Previous</button>
-            <input type="number" id="pageInput" name="page" value="@currentPage" min="1" max="@maxPage" class="form-control mx-2" style="width:80px;" />
-            <span>of @maxPage</span>
-            <button type="button" class="btn btn-secondary ms-2" onclick="changePage(1)">Next</button>
-        </form>
+        @foreach (var group in groupedAttributes)
+        {
+            var product = productsDict.ContainsKey(group.Key) ? productsDict[group.Key] : null;
+            var productName = product?.ProductName ?? $"Product ID: {group.Key}";
+            var productBrand = product?.BrandName;
+            var productCategory = product?.CategoryName;
+            var attributeCount = group.Count();
+            var groupId = $"product-{group.Key}";
+
+            <div class="attribute-container">
+                <div class="product-header" onclick="toggleAttributes('@groupId')">
+                    <div class="product-info">
+                        <div>
+                            <div class="product-name">@productName</div>
+                            @if (!string.IsNullOrEmpty(productBrand) || !string.IsNullOrEmpty(productCategory))
+                            {
+                                <div class="product-meta">
+                                    @if (!string.IsNullOrEmpty(productBrand))
+                                    {
+                                        <span>@productBrand</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(productBrand) && !string.IsNullOrEmpty(productCategory))
+                                    {
+                                        <span> - </span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(productCategory))
+                                    {
+                                        <span>@productCategory</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <span class="attribute-count">@attributeCount attribute(s)</span>
+                    </div>
+                    <button type="button" class="btn-toggle" onclick="event.stopPropagation(); toggleAttributes('@groupId')">
+                        <i class="fas fa-chevron-down" id="icon-@groupId"></i> Show
+                    </button>
+                </div>
+                <div class="attributes-list" id="@groupId">
+                    @foreach (var attr in group.OrderBy(a => a.AttributeName))
+                    {
+                        <div class="attribute-item">
+                            <div class="attribute-details">
+                                <div class="attribute-name">@attr.AttributeName</div>
+                                <div class="attribute-value">@attr.AttributeValue</div>
+                            </div>
+                            <div class="attribute-actions">
+                                <a asp-action="Edit" asp-route-id="@attr.Id" class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@attr.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this attribute?');">
+                                    <button type="submit" class="btn-action btn-delete">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     }
 </div>
 
 @section Scripts {
     <script>
-        function changePage(delta) {
-            let page = parseInt(document.getElementById("pageInput").value) || 1;
-            page += delta;
-            if (page < 1) page = 1;
-            if (page > @maxPage) page = @maxPage;
-            document.getElementById("pageInput").value = page;
-            document.getElementById("pageForm").submit();
+        function toggleAttributes(groupId) {
+            const list = document.getElementById(groupId);
+            const icon = document.getElementById('icon-' + groupId);
+            const btn = icon.closest('.btn-toggle');
+            
+            if (list.classList.contains('show')) {
+                list.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btn.innerHTML = '<i class="fas fa-chevron-down" id="icon-' + groupId + '"></i> Show';
+            } else {
+                list.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btn.innerHTML = '<i class="fas fa-chevron-up" id="icon-' + groupId + '"></i> Hide';
+            }
         }
     </script>
 }
-
-
