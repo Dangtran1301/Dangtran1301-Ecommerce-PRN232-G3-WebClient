@@ -8,8 +8,10 @@ public interface ITokenProvider
     bool IsAuthenticated { get; }
 
     Guid GetUserId();
+
     string? GetUserRole();
 
     void SetTokens(string accessToken, string refreshToken);
+
     void ClearTokens();
 }

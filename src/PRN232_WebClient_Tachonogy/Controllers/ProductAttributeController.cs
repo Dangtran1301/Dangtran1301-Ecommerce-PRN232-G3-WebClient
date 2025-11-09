@@ -67,7 +67,7 @@ public class ProductAttributeController(
         try
         {
             var productsResult = await productService.GetAllAsync(cancellationToken);
-            
+
             if (productsResult.Success && productsResult.Data != null)
             {
                 ViewBag.Products = productsResult.Data.ToList();
@@ -103,14 +103,14 @@ public class ProductAttributeController(
         {
             ModelState.AddModelError("ProductId", "Please select a product.");
         }
-        
+
         // Reload products for dropdown if validation fails
         if (!ModelState.IsValid)
         {
             try
             {
                 var productsResult = await productService.GetAllAsync(cancellationToken);
-                
+
                 if (productsResult.Success && productsResult.Data != null)
                 {
                     ViewBag.Products = productsResult.Data.ToList();
@@ -136,18 +136,18 @@ public class ProductAttributeController(
             AttributeName = dto.AttributeName?.Trim() ?? "",
             AttributeValue = dto.AttributeValue?.Trim() ?? ""
         };
-        
+
         // Re-validate after trimming
         if (string.IsNullOrWhiteSpace(dto.AttributeName))
         {
             ModelState.AddModelError("AttributeName", "Attribute name is required");
         }
-        
+
         if (string.IsNullOrWhiteSpace(dto.AttributeValue))
         {
             ModelState.AddModelError("AttributeValue", "Attribute value is required");
         }
-        
+
         if (!ModelState.IsValid)
         {
             // Reload products for dropdown
@@ -170,9 +170,9 @@ public class ProductAttributeController(
             return View(dto);
         }
 
-        logger.LogInformation("Creating product attribute: ProductId={ProductId}, AttributeName={AttributeName}, AttributeValue={AttributeValue}", 
+        logger.LogInformation("Creating product attribute: ProductId={ProductId}, AttributeName={AttributeName}, AttributeValue={AttributeValue}",
             dto.ProductId, dto.AttributeName, dto.AttributeValue);
-        
+
         var result = await service.CreateAsync(dto, cancellationToken);
         if (!result.Success)
         {
@@ -196,15 +196,15 @@ public class ProductAttributeController(
                 ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
                 logger.LogError(ex, "Exception while reloading products");
             }
-            
+
             var errorMessage = result.Error?.Message ?? "Error creating product attribute";
             ModelState.AddModelError("", errorMessage);
-            logger.LogError("Failed to create product attribute: {Error}. ProductId={ProductId}, AttributeName={AttributeName}", 
+            logger.LogError("Failed to create product attribute: {Error}. ProductId={ProductId}, AttributeName={AttributeName}",
                 errorMessage, dto.ProductId, dto.AttributeName);
             return View(dto);
         }
 
-        logger.LogInformation("Product attribute created successfully: ProductId={ProductId}, AttributeName={AttributeName}", 
+        logger.LogInformation("Product attribute created successfully: ProductId={ProductId}, AttributeName={AttributeName}",
             dto.ProductId, dto.AttributeName);
         TempData["SuccessMessage"] = "Product attribute created successfully!";
         return RedirectToAction(nameof(Index));
@@ -271,5 +271,3 @@ public class ProductAttributeController(
         return View(result.Data);
     }
 }
-
-

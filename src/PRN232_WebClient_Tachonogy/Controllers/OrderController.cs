@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Services.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Controllers
 {
-    
     public class OrderController(IOrderService orderService, ILogger<OrderController> logger) : Controller
     {
         [HttpGet]
@@ -63,7 +61,6 @@ namespace PRN232_WebClient_Tachonogy.Controllers
         }
 
         [HttpGet]
-
         public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
         {
             var order = await orderService.GetByIdAsync(id, cancellationToken);
@@ -95,7 +92,6 @@ namespace PRN232_WebClient_Tachonogy.Controllers
         }
 
         [HttpPost]
-
         public async Task<IActionResult> Edit(UpdateOrderRequest dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)

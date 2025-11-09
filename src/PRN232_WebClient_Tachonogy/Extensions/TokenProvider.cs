@@ -1,22 +1,27 @@
-﻿using System.Security.Claims;
-using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
+﻿using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace PRN232_WebClient_Tachonogy.Extensions;
 
 public class TokenProvider(IHttpContextAccessor accessor) : ITokenProvider
 {
-
-    private readonly ISession? Session = accessor.HttpContext?.Session;
-
-    public string? AccessToken => Session?.GetString("AccessToken");
-    public string? RefreshToken => Session?.GetString("RefreshToken");
+    public string? AccessToken => accessor.HttpContext?.Request.Cookies["AccessToken"];
+    public string? RefreshToken => accessor.HttpContext?.Request.Cookies["RefreshToken"];
 
     public bool IsAuthenticated => accessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
 
     public Guid GetUserId()
     {
-        var idClaim = accessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-        return Guid.TryParse(idClaim?.Value, out var id) ? id : Guid.Empty;
+        var accessToken = AccessToken;
+        if (string.IsNullOrEmpty(accessToken))
+            return Guid.Empty;
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(accessToken);
+        var subClaim = jwt.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+        return Guid.TryParse(subClaim, out var id) ? id : Guid.Empty;
     }
 
     public string? GetUserRole() =>

@@ -5,6 +5,7 @@ namespace PRN232_WebClient_Tachonogy.Services.Interfaces;
 public interface IAdminService
 {
     Task<ApiResponse<IEnumerable<AuthUserResponse>>> GetAllAsync(CancellationToken cancellationToken = default);
+
     Task<ApiResponse<AuthUserResponse>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<ApiResponse<AuthUserResponse>> CreateAsync(RegisterRequest request,

@@ -45,6 +45,7 @@ public class ProductController(
             return new List<CategoryDto>();
         }
     }
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> Index(string? keyword, int page = 1, int pageSize = 12, string? sortBy = null, string orderBy = "ProductName", bool descending = false, CancellationToken cancellationToken = default)
@@ -52,7 +53,7 @@ public class ProductController(
         // Handle sortBy from dropdown (Price_ASC, Price_DESC, etc.)
         var actualOrderBy = orderBy;
         var actualDescending = descending;
-        
+
         if (!string.IsNullOrEmpty(sortBy))
         {
             if (sortBy == "Price_ASC")
@@ -102,18 +103,18 @@ public class ProductController(
         // Get brands and categories for dropdown - use direct OData endpoint
         ViewBag.Brands = await LoadBrandsAsync(cancellationToken);
         ViewBag.Categories = await LoadCategoriesAsync(cancellationToken);
-        
+
         // Load all ProductVariants and ProductAttributes for selection
         try
         {
-            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-            { 
+            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+            {
                 PageSize = 1000,
                 OrderBy = "VariantName",
                 Descending = false
             }, cancellationToken);
-            ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null 
-                ? variantsResult.Data.Items 
+            ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null
+                ? variantsResult.Data.Items
                 : new List<ProductVariantDto>();
         }
         catch
@@ -123,21 +124,21 @@ public class ProductController(
 
         try
         {
-            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-            { 
+            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+            {
                 PageSize = 1000,
                 OrderBy = "AttributeName",
                 Descending = false
             }, cancellationToken);
-            ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                ? attributesResult.Data.Items 
+            ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null
+                ? attributesResult.Data.Items
                 : new List<ProductAttributeDto>();
         }
         catch
         {
             ViewBag.AllProductAttributes = new List<ProductAttributeDto>();
         }
-        
+
         return View();
     }
 
@@ -165,18 +166,18 @@ public class ProductController(
             // Reload dropdowns - use direct OData endpoint
             ViewBag.Brands = await LoadBrandsAsync(cancellationToken);
             ViewBag.Categories = await LoadCategoriesAsync(cancellationToken);
-            
+
             // Reload ProductVariants and ProductAttributes
             try
             {
-                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-                { 
+                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "VariantName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null 
-                    ? variantsResult.Data.Items 
+                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null
+                    ? variantsResult.Data.Items
                     : new List<ProductVariantDto>();
             }
             catch
@@ -186,21 +187,21 @@ public class ProductController(
 
             try
             {
-                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-                { 
+                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "AttributeName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                    ? attributesResult.Data.Items 
+                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null
+                    ? attributesResult.Data.Items
                     : new List<ProductAttributeDto>();
             }
             catch
             {
                 ViewBag.AllProductAttributes = new List<ProductAttributeDto>();
             }
-            
+
             return View(dto);
         }
 
@@ -220,18 +221,18 @@ public class ProductController(
             // Reload dropdowns - use direct OData endpoint
             ViewBag.Brands = await LoadBrandsAsync(cancellationToken);
             ViewBag.Categories = await LoadCategoriesAsync(cancellationToken);
-            
+
             // Reload ProductVariants and ProductAttributes
             try
             {
-                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-                { 
+                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "VariantName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null 
-                    ? variantsResult.Data.Items 
+                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null
+                    ? variantsResult.Data.Items
                     : new List<ProductVariantDto>();
             }
             catch
@@ -241,21 +242,21 @@ public class ProductController(
 
             try
             {
-                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-                { 
+                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "AttributeName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                    ? attributesResult.Data.Items 
+                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null
+                    ? attributesResult.Data.Items
                     : new List<ProductAttributeDto>();
             }
             catch
             {
                 ViewBag.AllProductAttributes = new List<ProductAttributeDto>();
             }
-            
+
             return View(dto);
         }
 
@@ -290,12 +291,12 @@ public class ProductController(
                             Sku = variantResult.Data.Sku,
                             ImageUrl = variantResult.Data.ImageUrl
                         };
-                        
+
                         var createResult = await productVariantService.CreateAsync(createDto, cancellationToken);
                         if (!createResult.Success)
                         {
                             errors.Add($"Failed to associate variant '{variantResult.Data.VariantName}': {createResult.Error?.Message}");
-                            logger.LogWarning("Failed to create ProductVariant copy for Product {ProductId}: {Error}", 
+                            logger.LogWarning("Failed to create ProductVariant copy for Product {ProductId}: {Error}",
                                 productId, createResult.Error?.Message);
                         }
                     }
@@ -326,12 +327,12 @@ public class ProductController(
                             AttributeName = attributeResult.Data.AttributeName,
                             AttributeValue = attributeResult.Data.AttributeValue
                         };
-                        
+
                         var createResult = await productAttributeService.CreateAsync(createDto, cancellationToken);
                         if (!createResult.Success)
                         {
                             errors.Add($"Failed to associate attribute '{attributeResult.Data.AttributeName}': {createResult.Error?.Message}");
-                            logger.LogWarning("Failed to create ProductAttribute copy for Product {ProductId}: {Error}", 
+                            logger.LogWarning("Failed to create ProductAttribute copy for Product {ProductId}: {Error}",
                                 productId, createResult.Error?.Message);
                         }
                     }
@@ -348,8 +349,8 @@ public class ProductController(
         if (dto.Stock != null && (dto.Stock.Quantity > 0 || !string.IsNullOrWhiteSpace(dto.Stock.Location)))
         {
             // Check if stock already exists for this product
-            var existingStockResult = await stockService.GetStocksAsync(new StockFilterDto 
-            { 
+            var existingStockResult = await stockService.GetStocksAsync(new StockFilterDto
+            {
                 ProductId = productId,
                 PageSize = 1
             }, cancellationToken);
@@ -371,7 +372,7 @@ public class ProductController(
                 if (!stockUpdateResult.Success)
                 {
                     errors.Add($"Failed to update stock: {stockUpdateResult.Error?.Message}");
-                    logger.LogWarning("Failed to update Stock for Product {ProductId}: {Error}", 
+                    logger.LogWarning("Failed to update Stock for Product {ProductId}: {Error}",
                         productId, stockUpdateResult.Error?.Message);
                 }
             }
@@ -389,7 +390,7 @@ public class ProductController(
                 if (!stockResult.Success)
                 {
                     errors.Add($"Failed to create stock: {stockResult.Error?.Message}");
-                    logger.LogWarning("Failed to create Stock for Product {ProductId}: {Error}", 
+                    logger.LogWarning("Failed to create Stock for Product {ProductId}: {Error}",
                         productId, stockResult.Error?.Message);
                 }
             }
@@ -422,13 +423,13 @@ public class ProductController(
         // Load ProductVariants and ProductAttributes for this product
         try
         {
-            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-            { 
+            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+            {
                 ProductId = id,
                 PageSize = 100
             }, cancellationToken);
-            ViewBag.ProductVariants = variantsResult.Success && variantsResult.Data != null 
-                ? variantsResult.Data.Items 
+            ViewBag.ProductVariants = variantsResult.Success && variantsResult.Data != null
+                ? variantsResult.Data.Items
                 : new List<ProductVariantDto>();
         }
         catch
@@ -438,13 +439,13 @@ public class ProductController(
 
         try
         {
-            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-            { 
+            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+            {
                 ProductId = id,
                 PageSize = 100
             }, cancellationToken);
-            ViewBag.ProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                ? attributesResult.Data.Items 
+            ViewBag.ProductAttributes = attributesResult.Success && attributesResult.Data != null
+                ? attributesResult.Data.Items
                 : new List<ProductAttributeDto>();
         }
         catch
@@ -455,14 +456,14 @@ public class ProductController(
         // Load all ProductVariants and ProductAttributes for selection
         try
         {
-            var allVariantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-            { 
+            var allVariantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+            {
                 PageSize = 1000,
                 OrderBy = "VariantName",
                 Descending = false
             }, cancellationToken);
-            ViewBag.AllProductVariants = allVariantsResult.Success && allVariantsResult.Data != null 
-                ? allVariantsResult.Data.Items 
+            ViewBag.AllProductVariants = allVariantsResult.Success && allVariantsResult.Data != null
+                ? allVariantsResult.Data.Items
                 : new List<ProductVariantDto>();
         }
         catch
@@ -472,14 +473,14 @@ public class ProductController(
 
         try
         {
-            var allAttributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-            { 
+            var allAttributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+            {
                 PageSize = 1000,
                 OrderBy = "AttributeName",
                 Descending = false
             }, cancellationToken);
-            ViewBag.AllProductAttributes = allAttributesResult.Success && allAttributesResult.Data != null 
-                ? allAttributesResult.Data.Items 
+            ViewBag.AllProductAttributes = allAttributesResult.Success && allAttributesResult.Data != null
+                ? allAttributesResult.Data.Items
                 : new List<ProductAttributeDto>();
         }
         catch
@@ -490,8 +491,8 @@ public class ProductController(
         // Load existing Stock for this product
         try
         {
-            var stockResult = await stockService.GetStocksAsync(new StockFilterDto 
-            { 
+            var stockResult = await stockService.GetStocksAsync(new StockFilterDto
+            {
                 ProductId = id,
                 PageSize = 1
             }, cancellationToken);
@@ -539,18 +540,18 @@ public class ProductController(
             // Reload dropdowns - use direct OData endpoint
             ViewBag.Brands = await LoadBrandsAsync(cancellationToken);
             ViewBag.Categories = await LoadCategoriesAsync(cancellationToken);
-            
+
             // Reload ProductVariants and ProductAttributes
             try
             {
-                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-                { 
+                var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "VariantName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null 
-                    ? variantsResult.Data.Items 
+                ViewBag.AllProductVariants = variantsResult.Success && variantsResult.Data != null
+                    ? variantsResult.Data.Items
                     : new List<ProductVariantDto>();
             }
             catch
@@ -560,27 +561,27 @@ public class ProductController(
 
             try
             {
-                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-                { 
+                var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+                {
                     PageSize = 1000,
                     OrderBy = "AttributeName",
                     Descending = false
                 }, cancellationToken);
-                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                    ? attributesResult.Data.Items 
+                ViewBag.AllProductAttributes = attributesResult.Success && attributesResult.Data != null
+                    ? attributesResult.Data.Items
                     : new List<ProductAttributeDto>();
             }
             catch
             {
                 ViewBag.AllProductAttributes = new List<ProductAttributeDto>();
             }
-            
+
             return View(dto);
         }
 
         // Product updated successfully, now create ProductVariants and ProductAttributes if provided
         var errors = new List<string>();
-        
+
         // Note: We use the id parameter for ProductId since we're updating an existing product
 
         // Associate selected ProductVariants with this product (copy them to this product)
@@ -609,12 +610,12 @@ public class ProductController(
                             Sku = variantResult.Data.Sku,
                             ImageUrl = variantResult.Data.ImageUrl
                         };
-                        
+
                         var createResult = await productVariantService.CreateAsync(createDto, cancellationToken);
                         if (!createResult.Success)
                         {
                             errors.Add($"Failed to associate variant '{variantResult.Data.VariantName}': {createResult.Error?.Message}");
-                            logger.LogWarning("Failed to create ProductVariant copy for Product {ProductId}: {Error}", 
+                            logger.LogWarning("Failed to create ProductVariant copy for Product {ProductId}: {Error}",
                                 id, createResult.Error?.Message);
                         }
                     }
@@ -651,12 +652,12 @@ public class ProductController(
                             AttributeName = attributeResult.Data.AttributeName,
                             AttributeValue = attributeResult.Data.AttributeValue
                         };
-                        
+
                         var createResult = await productAttributeService.CreateAsync(createDto, cancellationToken);
                         if (!createResult.Success)
                         {
                             errors.Add($"Failed to associate attribute '{attributeResult.Data.AttributeName}': {createResult.Error?.Message}");
-                            logger.LogWarning("Failed to create ProductAttribute copy for Product {ProductId}: {Error}", 
+                            logger.LogWarning("Failed to create ProductAttribute copy for Product {ProductId}: {Error}",
                                 id, createResult.Error?.Message);
                         }
                     }
@@ -673,8 +674,8 @@ public class ProductController(
         if (dto.Stock != null)
         {
             // Check if stock exists for this product
-            var existingStockResult = await stockService.GetStocksAsync(new StockFilterDto 
-            { 
+            var existingStockResult = await stockService.GetStocksAsync(new StockFilterDto
+            {
                 ProductId = id,
                 PageSize = 1
             }, cancellationToken);
@@ -696,7 +697,7 @@ public class ProductController(
                 if (!stockUpdateResult.Success)
                 {
                     errors.Add($"Failed to update stock: {stockUpdateResult.Error?.Message}");
-                    logger.LogWarning("Failed to update Stock for Product {ProductId}: {Error}", 
+                    logger.LogWarning("Failed to update Stock for Product {ProductId}: {Error}",
                         id, stockUpdateResult.Error?.Message);
                 }
             }
@@ -716,7 +717,7 @@ public class ProductController(
                     if (!stockResult.Success)
                     {
                         errors.Add($"Failed to create stock: {stockResult.Error?.Message}");
-                        logger.LogWarning("Failed to create Stock for Product {ProductId}: {Error}", 
+                        logger.LogWarning("Failed to create Stock for Product {ProductId}: {Error}",
                             id, stockResult.Error?.Message);
                     }
                 }
@@ -762,13 +763,13 @@ public class ProductController(
         // Load ProductVariants for this product
         try
         {
-            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto 
-            { 
+            var variantsResult = await productVariantService.GetProductVariantsAsync(new ProductVariantFilterDto
+            {
                 ProductId = id,
                 PageSize = 100
             }, cancellationToken);
-            ViewBag.ProductVariants = variantsResult.Success && variantsResult.Data != null 
-                ? variantsResult.Data.Items 
+            ViewBag.ProductVariants = variantsResult.Success && variantsResult.Data != null
+                ? variantsResult.Data.Items
                 : new List<ProductVariantDto>();
         }
         catch
@@ -779,13 +780,13 @@ public class ProductController(
         // Load ProductAttributes for this product
         try
         {
-            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto 
-            { 
+            var attributesResult = await productAttributeService.GetProductAttributesAsync(new ProductAttributeFilterDto
+            {
                 ProductId = id,
                 PageSize = 100
             }, cancellationToken);
-            ViewBag.ProductAttributes = attributesResult.Success && attributesResult.Data != null 
-                ? attributesResult.Data.Items 
+            ViewBag.ProductAttributes = attributesResult.Success && attributesResult.Data != null
+                ? attributesResult.Data.Items
                 : new List<ProductAttributeDto>();
         }
         catch
@@ -796,8 +797,8 @@ public class ProductController(
         // Load Stock for this product
         try
         {
-            var stockResult = await stockService.GetStocksAsync(new StockFilterDto 
-            { 
+            var stockResult = await stockService.GetStocksAsync(new StockFilterDto
+            {
                 ProductId = id,
                 PageSize = 1
             }, cancellationToken);
@@ -813,4 +814,3 @@ public class ProductController(
         return View(result.Data);
     }
 }
-

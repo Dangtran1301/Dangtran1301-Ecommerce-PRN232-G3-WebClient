@@ -36,5 +36,3 @@ public class ProductService(IProductApiClient productApiClient, ILogger<ProductS
         return await productApiClient.DeleteAsync(id, cancellationToken);
     }
 }
-
-

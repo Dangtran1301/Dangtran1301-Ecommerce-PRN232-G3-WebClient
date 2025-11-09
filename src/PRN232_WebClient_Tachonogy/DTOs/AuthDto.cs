@@ -131,7 +131,6 @@ public class UserFilterRequest
     public bool Descending { get; set; } = false;
 }
 
-
 public enum Role
 {
     Admin,
@@ -141,9 +140,9 @@ public enum Role
 
 public enum Gender
 {
-    Male,
-    Female,
-    Unknown
+    Male = 0,
+    Female = 1,
+    Unknown = 2,
 }
 
 public enum AccountStatus

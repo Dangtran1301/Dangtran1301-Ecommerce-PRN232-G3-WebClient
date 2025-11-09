@@ -42,7 +42,7 @@ namespace PRN232_WebClient_Tachonogy.Controllers
                  response.Data.FullName,
                  response.Data.PhoneNumber,
                  response.Data.Avatar,
-                 response.Data.Gender, 
+                 response.Data.Gender,
                  response.Data.DayOfBirth,
                  response.Data.Address
             );

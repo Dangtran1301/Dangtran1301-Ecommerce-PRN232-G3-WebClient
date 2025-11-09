@@ -20,6 +20,7 @@ html {
 body {
     margin-bottom: 60px;
 }
+
 .table-hover tbody tr:hover {
     background-color: #f8f9fa;
     transition: all 0.2s ease-in-out;

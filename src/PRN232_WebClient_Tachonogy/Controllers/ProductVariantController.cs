@@ -67,7 +67,7 @@ public class ProductVariantController(
         try
         {
             var productsResult = await productService.GetAllAsync(cancellationToken);
-            
+
             if (productsResult.Success && productsResult.Data != null)
             {
                 ViewBag.Products = productsResult.Data.ToList();
@@ -103,14 +103,14 @@ public class ProductVariantController(
         {
             ModelState.AddModelError("ProductId", "Please select a product.");
         }
-        
+
         // Reload products for dropdown if validation fails
         if (!ModelState.IsValid)
         {
             try
             {
                 var productsResult = await productService.GetAllAsync(cancellationToken);
-                
+
                 if (productsResult.Success && productsResult.Data != null)
                 {
                     ViewBag.Products = productsResult.Data.ToList();
@@ -137,24 +137,24 @@ public class ProductVariantController(
             Sku = string.IsNullOrWhiteSpace(dto.Sku) ? null : dto.Sku.Trim(),
             ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim()
         };
-        
+
         // Validate ImageUrl format if provided
         if (!string.IsNullOrWhiteSpace(dto.ImageUrl) && !Uri.IsWellFormedUriString(dto.ImageUrl, UriKind.Absolute))
         {
             ModelState.AddModelError("ImageUrl", "Invalid image URL format");
         }
-        
+
         // Re-validate after trimming
         if (string.IsNullOrWhiteSpace(dto.VariantName))
         {
             ModelState.AddModelError("VariantName", "Variant name is required");
         }
-        
+
         if (dto.Price <= 0)
         {
             ModelState.AddModelError("Price", "Price must be greater than 0");
         }
-        
+
         if (!ModelState.IsValid)
         {
             // Reload products for dropdown
@@ -177,9 +177,9 @@ public class ProductVariantController(
             return View(dto);
         }
 
-        logger.LogInformation("Creating product variant: ProductId={ProductId}, VariantName={VariantName}, Price={Price}", 
+        logger.LogInformation("Creating product variant: ProductId={ProductId}, VariantName={VariantName}, Price={Price}",
             dto.ProductId, dto.VariantName, dto.Price);
-        
+
         var result = await service.CreateAsync(dto, cancellationToken);
         if (!result.Success)
         {
@@ -203,15 +203,15 @@ public class ProductVariantController(
                 ViewBag.ErrorMessage = $"Error loading products: {ex.Message}";
                 logger.LogError(ex, "Exception while reloading products");
             }
-            
+
             var errorMessage = result.Error?.Message ?? "Error creating product variant";
             ModelState.AddModelError("", errorMessage);
-            logger.LogError("Failed to create product variant: {Error}. ProductId={ProductId}, VariantName={VariantName}", 
+            logger.LogError("Failed to create product variant: {Error}. ProductId={ProductId}, VariantName={VariantName}",
                 errorMessage, dto.ProductId, dto.VariantName);
             return View(dto);
         }
 
-        logger.LogInformation("Product variant created successfully: ProductId={ProductId}, VariantName={VariantName}", 
+        logger.LogInformation("Product variant created successfully: ProductId={ProductId}, VariantName={VariantName}",
             dto.ProductId, dto.VariantName);
         TempData["SuccessMessage"] = "Product variant created successfully!";
         return RedirectToAction(nameof(Index));
@@ -282,5 +282,3 @@ public class ProductVariantController(
         return View(result.Data);
     }
 }
-
-

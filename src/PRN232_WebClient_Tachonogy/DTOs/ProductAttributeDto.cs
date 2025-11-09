@@ -40,5 +40,3 @@ public class ProductAttributeFilterDto
     public string? OrderBy { get; set; } = "Id";
     public bool Descending { get; set; } = false;
 }
-
-

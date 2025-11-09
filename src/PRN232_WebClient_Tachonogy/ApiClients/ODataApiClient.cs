@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
-using PRN232_WebClient_Tachonogy.DTOs;
+﻿using PRN232_WebClient_Tachonogy.DTOs;
+using System.Text.Json;
+
 namespace PRN232_WebClient_Tachonogy.ApiClients
 {
     public class ODataApiClient

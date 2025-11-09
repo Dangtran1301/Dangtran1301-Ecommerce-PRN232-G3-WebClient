@@ -33,7 +33,7 @@ public class StockController(
         }
 
         List<(StockDto Stock, ProductDto? Product)> stocksWithProducts;
-        
+
         // If keyword is provided, load stocks in batches and filter client-side
         if (!string.IsNullOrWhiteSpace(keyword))
         {
@@ -44,7 +44,7 @@ public class StockController(
             var currentPage = 1;
             var hasMore = true;
             var batchCount = 0;
-            
+
             while (hasMore && batchCount < maxBatches)
             {
                 try
@@ -58,7 +58,7 @@ public class StockController(
                         OrderBy = "Quantity",
                         Descending = false
                     };
-                    
+
                     var batchResult = await service.GetStocksAsync(filter, cancellationToken);
                     if (batchResult.Success && batchResult.Data != null)
                     {
@@ -91,32 +91,32 @@ public class StockController(
                     break;
                 }
             }
-            
+
             // Filter by keyword (product name) client-side
             stocksWithProducts = new List<(StockDto Stock, ProductDto? Product)>();
             foreach (var stock in allStocks)
             {
                 var product = productsDict.ContainsKey(stock.ProductId) ? productsDict[stock.ProductId] : null;
-                
+
                 // Filter by keyword (product name)
-                if (product == null || 
+                if (product == null ||
                     (product.ProductName != null && !product.ProductName.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
                 {
                     continue; // Skip this stock if product name doesn't match keyword
                 }
-                
+
                 stocksWithProducts.Add((stock, product));
             }
-            
+
             // Apply pagination after filtering
             var totalCount = stocksWithProducts.Count;
             var skip = (page - 1) * pageSize;
             var pagedStocks = stocksWithProducts.Skip(skip).Take(pageSize).ToList();
-            
+
             ViewBag.StocksWithProducts = pagedStocks;
             ViewBag.Page = page;
             ViewBag.MaxPage = Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
-            
+
             // Show warning if we hit the batch limit
             if (batchCount >= maxBatches && allStocks.Count >= maxBatches * batchSize)
             {
@@ -139,7 +139,7 @@ public class StockController(
             var result = await service.GetStocksAsync(filter, cancellationToken);
             ViewBag.Page = page;
             ViewBag.MaxPage = result.Data?.TotalPages ?? 1;
-            
+
             // Load product information for each stock
             stocksWithProducts = new List<(StockDto Stock, ProductDto? Product)>();
             if (result.Success && result.Data != null)
@@ -150,10 +150,10 @@ public class StockController(
                     stocksWithProducts.Add((stock, product));
                 }
             }
-            
+
             ViewBag.StocksWithProducts = stocksWithProducts;
         }
-        
+
         ViewBag.Location = location;
         ViewBag.Keyword = keyword;
 
@@ -329,5 +329,3 @@ public class StockController(
         return View(result.Data);
     }
 }
-
-

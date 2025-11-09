@@ -6,7 +6,6 @@ namespace PRN232_WebClient_Tachonogy.Services;
 
 public class UserProfileService(IUserProfileApiClient userProfileApiClient, ILogger<UserProfileService> logger) : IUserProfileService
 {
-
     public Task<ApiResponse<UserProfileDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => userProfileApiClient.GetByIdAsync(id, cancellationToken);
 

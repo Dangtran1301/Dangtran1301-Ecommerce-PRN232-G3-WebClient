@@ -1,4 +1,5 @@
-﻿using PRN232_WebClient_Tachonogy.DTOs;
+﻿using PRN232_WebClient_Tachonogy.ApiClients.Interfaces;
+using PRN232_WebClient_Tachonogy.DTOs;
 using PRN232_WebClient_Tachonogy.Extensions.Interfaces;
 
 namespace PRN232_WebClient_Tachonogy.Extensions

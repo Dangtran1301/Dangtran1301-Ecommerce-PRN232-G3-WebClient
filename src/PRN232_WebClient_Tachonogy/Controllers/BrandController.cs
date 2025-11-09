@@ -35,6 +35,7 @@ namespace PRN232_WebClient_Tachonogy.Controllers
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create() => View();
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(CreateBrandRequest dto, CancellationToken cancellationToken)
@@ -107,6 +108,7 @@ namespace PRN232_WebClient_Tachonogy.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Detail(Guid id, CancellationToken cancellationToken)

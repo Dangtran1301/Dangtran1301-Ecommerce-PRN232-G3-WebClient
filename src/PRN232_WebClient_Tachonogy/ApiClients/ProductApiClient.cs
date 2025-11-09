@@ -21,11 +21,11 @@ public class ProductApiClient : IProductApiClient
         var top = filter.PageSize ?? 10;
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
-        
+
         // Only add $orderby if OrderBy is specified and not empty
         // Use Id as default orderby for OData compatibility (always available in DTO)
         var orderByField = !string.IsNullOrWhiteSpace(filter.OrderBy) ? filter.OrderBy.Trim() : "Id";
-        
+
         // Validate orderBy field - only allow fields that exist in ProductDto
         // ProductDto has: Id, ProductName, Description, Price, Sku, ImageUrl, Specifications, BrandId, BrandName, CategoryId, CategoryName
         var validOrderByFields = new[] { "Id", "ProductName", "Price", "BrandId", "CategoryId" };
@@ -33,23 +33,23 @@ public class ProductApiClient : IProductApiClient
         {
             orderByField = "Id"; // Fallback to Id if invalid field
         }
-        
+
         var orderByClause = $"{orderByField} {(filter.Descending ? "desc" : "asc")}";
         queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
-        
+
         var filterParts = new List<string>();
-        
+
         if (!string.IsNullOrWhiteSpace(filter.Keyword))
         {
             var keyword = filter.Keyword.Replace("'", "''");
             filterParts.Add($"(contains(ProductName,'{keyword}') or contains(Description,'{keyword}'))");
         }
-        
+
         if (filter.BrandId.HasValue)
         {
             filterParts.Add($"BrandId eq {filter.BrandId.Value}");
         }
-        
+
         if (filter.CategoryId.HasValue)
         {
             filterParts.Add($"CategoryId eq {filter.CategoryId.Value}");
@@ -92,4 +92,3 @@ public class ProductApiClient : IProductApiClient
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         => apiClient.DeleteAsync($"api/v1/catalog/products/{id}", cancellationToken);
 }
-
