@@ -141,9 +141,9 @@ public enum Role
 
 public enum Gender
 {
-    Male,
-    Female,
-    Unknown
+    Male = 0,
+    Female = 1,
+    Unknown = 2,
 }
 
 public enum AccountStatus

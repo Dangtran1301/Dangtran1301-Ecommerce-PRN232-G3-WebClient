@@ -49,8 +49,6 @@ public class AuthController(IAuthService authService, ITokenProvider tokenProvid
         var principal = new ClaimsPrincipal(identity);
 
         tokenProvider.SetTokens(response.Data.AccessToken, response.Data.RefreshToken);
-        HttpContext.Session.SetString("AccessToken", response.Data.AccessToken);
-        HttpContext.Session.SetString("RefreshToken", response.Data.RefreshToken);
         await HttpContext.SignInAsync("CookieAuth", principal);
 
         TempData["SuccessMessages"] = $"Welcome back, {user.FullName}";
@@ -67,6 +65,7 @@ public class AuthController(IAuthService authService, ITokenProvider tokenProvid
         if (!string.IsNullOrEmpty(refreshToken))
         {
             await authService.LogoutAsync(new RefreshTokenRequestDto { RefreshToken = refreshToken }, cancellationToken);
+            tokenProvider.ClearTokens();
         }
 
         await HttpContext.SignOutAsync("CookieAuth");

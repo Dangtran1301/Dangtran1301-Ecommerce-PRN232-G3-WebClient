@@ -419,3 +419,4 @@ FodyWeavers.xsd
 
 appsettings*.json
 !appsettings.example.json
+/src/PRN232_WebClient_Tachonogy/keys

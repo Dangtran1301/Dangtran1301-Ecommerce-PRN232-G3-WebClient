@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using PRN232_WebClient_Tachonogy.ApiClients;
 using PRN232_WebClient_Tachonogy.ApiClients.Interfaces;
 using PRN232_WebClient_Tachonogy.Extensions;
@@ -26,12 +27,10 @@ builder.Services.AddAuthentication("CookieAuth")
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
         options.SlidingExpiration = true;
     });
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.IdleTimeout = TimeSpan.FromHours(1);
-});
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"./keys"))
+    .SetApplicationName("TachonogyApp");
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
@@ -48,6 +47,7 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 });
+
 builder.Services.AddHttpClient<IAdminClient, AdminClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiGateway:BaseUrl"]!);
@@ -82,13 +82,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthentication();
+app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthorization();
 
 app.MapControllerRoute(
