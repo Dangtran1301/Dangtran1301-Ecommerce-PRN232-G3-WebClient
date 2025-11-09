@@ -21,21 +21,21 @@ public class StockApiClient : IStockApiClient
         var top = filter.PageSize ?? 10;
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
-        
+
         // Only add $orderby if OrderBy is specified
         if (!string.IsNullOrWhiteSpace(filter.OrderBy))
         {
             var orderByClause = $"{filter.OrderBy} {(filter.Descending ? "desc" : "asc")}";
             queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
         }
-        
+
         var filterParts = new List<string>();
-        
+
         if (filter.ProductId.HasValue)
         {
             filterParts.Add($"ProductId eq {filter.ProductId.Value}");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(filter.Location))
         {
             var location = filter.Location.Replace("'", "''");
@@ -76,4 +76,3 @@ public class StockApiClient : IStockApiClient
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         => apiClient.DeleteAsync($"api/v1/catalog/stocks/{id}", cancellationToken);
 }
-

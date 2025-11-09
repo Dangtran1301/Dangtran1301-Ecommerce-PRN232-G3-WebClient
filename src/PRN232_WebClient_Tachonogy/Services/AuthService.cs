@@ -247,7 +247,6 @@ public class AuthService(HttpClient httpClient, ITokenProvider tokenProvider, IL
     {
         try
         {
-
             var response = await httpClient.PostAsJsonAsync($"{BaseEndpoint}/reset-password", dto, cancellationToken);
             return await ParseResponseAsync(response);
         }

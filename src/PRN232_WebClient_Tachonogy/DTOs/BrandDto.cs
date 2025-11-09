@@ -39,6 +39,7 @@ namespace PRN232_WebClient_Tachonogy.DTOs
         [Url(ErrorMessage = "Website URL must be a valid URL (e.g., https://example.com)")]
         public string? WebsiteUrl { get; set; }
     }
+
     public class BrandFilterDto
     {
         public string? Keyword { get; set; }

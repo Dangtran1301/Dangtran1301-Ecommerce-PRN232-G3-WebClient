@@ -31,6 +31,7 @@ namespace PRN232_WebClient_Tachonogy.DTOs
         [StringLength(1000, ErrorMessage = "Category description must not exceed 1000 characters")]
         public string? CategoryDescription { get; set; }
     }
+
     public class CategoryFilterDto
     {
         public string? Keyword { get; set; }
@@ -39,6 +40,7 @@ namespace PRN232_WebClient_Tachonogy.DTOs
         public string? OrderBy { get; set; } = "CreatedAt";
         public bool Descending { get; set; } = false;
     }
+
     public class ODataResponse<T>
     {
         [JsonPropertyName("@odata.context")]

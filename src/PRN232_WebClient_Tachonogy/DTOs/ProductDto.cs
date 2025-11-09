@@ -52,10 +52,10 @@ public record CreateProductVariantInlineRequest
 
     [Range(0.01, double.MaxValue)]
     public decimal? Price { get; set; }
-    
+
     [StringLength(255)]
     public string? Sku { get; set; }
-    
+
     [Url(ErrorMessage = "Invalid image URL format")]
     public string? ImageUrl { get; set; }
 }
@@ -64,7 +64,7 @@ public record CreateProductAttributeInlineRequest
 {
     [StringLength(255)]
     public string? AttributeName { get; set; }
-    
+
     [StringLength(500)]
     public string? AttributeValue { get; set; }
 }
@@ -138,5 +138,3 @@ public class ProductFilterDto
     public string? OrderBy { get; set; } = "CreatedAt";
     public bool Descending { get; set; } = false;
 }
-
-

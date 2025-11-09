@@ -20,7 +20,6 @@ public class TokenRefreshMiddleware(RequestDelegate next)
 
         if (!string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken))
         {
-
             try
             {
                 var jwtHandler = new JwtSecurityTokenHandler();

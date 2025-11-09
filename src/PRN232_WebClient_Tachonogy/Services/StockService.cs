@@ -31,5 +31,3 @@ public class StockService(IStockApiClient stockApiClient, ILogger<StockService> 
         return await stockApiClient.DeleteAsync(id, cancellationToken);
     }
 }
-
-

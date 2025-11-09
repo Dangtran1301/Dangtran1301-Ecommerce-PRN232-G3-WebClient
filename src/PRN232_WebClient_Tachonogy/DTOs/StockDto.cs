@@ -41,5 +41,3 @@ public class StockFilterDto
     public string? OrderBy { get; set; } = "Quantity";
     public bool Descending { get; set; } = false;
 }
-
-

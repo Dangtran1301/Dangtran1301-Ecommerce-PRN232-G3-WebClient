@@ -37,7 +37,7 @@ public record UpdateProductVariantRequest
     public decimal Price { get; set; }
 
     public string? Sku { get; set; }
-    
+
     public string? ImageUrl { get; set; }
 }
 
@@ -50,5 +50,3 @@ public class ProductVariantFilterDto
     public string? OrderBy { get; set; } = "Id";
     public bool Descending { get; set; } = false;
 }
-
-

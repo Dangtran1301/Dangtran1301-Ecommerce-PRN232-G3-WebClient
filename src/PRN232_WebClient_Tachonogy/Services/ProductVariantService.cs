@@ -31,5 +31,3 @@ public class ProductVariantService(IProductVariantApiClient productVariantApiCli
         return await productVariantApiClient.DeleteAsync(id, cancellationToken);
     }
 }
-
-

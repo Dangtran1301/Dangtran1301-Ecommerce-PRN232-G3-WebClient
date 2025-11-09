@@ -21,7 +21,7 @@ public class ProductVariantApiClient : IProductVariantApiClient
         var top = filter.PageSize ?? 10;
 
         var queryParams = new List<string> { "$count=true", $"$top={top}", $"$skip={skip}" };
-        
+
         // Validate and set OrderBy field
         var orderByField = !string.IsNullOrWhiteSpace(filter.OrderBy) ? filter.OrderBy.Trim() : "Id";
         // ProductVariantDto has: Id, ProductId, VariantName, Price, Sku, ImageUrl
@@ -30,18 +30,18 @@ public class ProductVariantApiClient : IProductVariantApiClient
         {
             orderByField = "Id"; // Fallback to Id if invalid field
         }
-        
+
         var orderByClause = $"{orderByField} {(filter.Descending ? "desc" : "asc")}";
         queryParams.Add($"$orderby={Uri.EscapeDataString(orderByClause)}");
-        
+
         var filterParts = new List<string>();
-        
+
         if (!string.IsNullOrWhiteSpace(filter.Keyword))
         {
             var keyword = filter.Keyword.Replace("'", "''");
             filterParts.Add($"(contains(VariantName,'{keyword}') or contains(Sku,'{keyword}'))");
         }
-        
+
         if (filter.ProductId.HasValue)
         {
             filterParts.Add($"ProductId eq {filter.ProductId.Value}");
@@ -81,4 +81,3 @@ public class ProductVariantApiClient : IProductVariantApiClient
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         => apiClient.DeleteAsync($"api/v1/catalog/product-variants/{id}", cancellationToken);
 }
-

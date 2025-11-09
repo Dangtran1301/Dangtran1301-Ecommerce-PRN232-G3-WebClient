@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PRN232_WebClient_Tachonogy.DTOs
 {
@@ -39,7 +37,6 @@ namespace PRN232_WebClient_Tachonogy.DTOs
         public Guid Id { get; set; }
         [Required]
         public int? Status { get; set; }
-
     }
 
     public class OrderFilterDto

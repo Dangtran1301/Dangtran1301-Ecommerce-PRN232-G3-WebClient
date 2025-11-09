@@ -131,7 +131,6 @@ public class UserFilterRequest
     public bool Descending { get; set; } = false;
 }
 
-
 public enum Role
 {
     Admin,
