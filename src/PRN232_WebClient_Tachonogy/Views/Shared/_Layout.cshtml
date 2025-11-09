@@ -67,6 +67,12 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
                         }
 
                         @if (role is "Admin")
@@ -79,6 +85,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Users" asp-action="Index">User Management</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
                             </li>
                         }
                         @if (role is "Customer")
