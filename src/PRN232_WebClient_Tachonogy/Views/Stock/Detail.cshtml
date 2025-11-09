@@ -1,0 +1,30 @@
+@model PRN232_WebClient_Tachonogy.DTOs.StockDto
+
+@{
+    ViewData["Title"] = "Stock Details";
+}
+
+<div class="container py-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Product ID:</dt>
+                <dd class="col-sm-9">@Model.ProductId</dd>
+
+                <dt class="col-sm-3">Quantity:</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.Quantity > 0 ? "bg-success" : "bg-danger") fs-6">
+                        @Model.Quantity
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">Location:</dt>
+                <dd class="col-sm-9">@Model.Location</dd>
+            </dl>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>
+
+

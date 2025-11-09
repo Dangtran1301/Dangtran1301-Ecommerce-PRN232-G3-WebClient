@@ -1,0 +1,424 @@
+@model PRN232_WebClient_Tachonogy.DTOs.UpdateProductRequest
+@{
+    ViewData["Title"] = "Edit Product";
+    var brands = ViewBag.Brands as List<PRN232_WebClient_Tachonogy.DTOs.BrandDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.BrandDto>();
+    var categories = ViewBag.Categories as List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto>();
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 fw-bold text-primary">
+        <i class="bi bi-pencil-square me-2"></i>@ViewData["Title"]
+    </h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="ProductName" class="form-label fw-semibold"></label>
+                        <input asp-for="ProductName" class="form-control" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Price" class="form-label fw-semibold"></label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="BrandId" class="form-label fw-semibold">Brand <span class="text-danger">*</span></label>
+                        @if (brands != null && brands.Any())
+                        {
+                            <select asp-for="BrandId" class="form-select" required>
+                                <option value="">-- Select Brand --</option>
+                                @foreach (var brand in brands)
+                                {
+                                    <option value="@(brand.Id)" selected="@(Model.BrandId == brand.Id)">@brand.BrandName</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select asp-for="BrandId" class="form-select" required disabled>
+                                <option value="@(Model.BrandId)">Current Brand (ID: @Model.BrandId)</option>
+                            </select>
+                            <small class="text-muted">No brands available. Current brand ID: @Model.BrandId</small>
+                        }
+                        <span asp-validation-for="BrandId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                        @if (categories != null && categories.Any())
+                        {
+                            <select asp-for="CategoryId" class="form-select" required>
+                                <option value="">-- Select Category --</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@(category.Id)" selected="@(Model.CategoryId == category.Id)">@category.CategoryName</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select asp-for="CategoryId" class="form-select" required disabled>
+                                <option value="@(Model.CategoryId)">Current Category (ID: @Model.CategoryId)</option>
+                            </select>
+                            <small class="text-muted">No categories available. Current category ID: @Model.CategoryId</small>
+                        }
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Sku" class="form-label fw-semibold"></label>
+                        <input asp-for="Sku" class="form-control" />
+                        <span asp-validation-for="Sku" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ImageUrl" class="form-label fw-semibold"></label>
+                        <input asp-for="ImageUrl" type="url" class="form-control" placeholder="https://example.com/image.jpg" />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Specifications" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Specifications" class="form-control" rows="5" placeholder="Enter product specifications (one per line)"></textarea>
+                    <span asp-validation-for="Specifications" class="text-danger"></span>
+                </div>
+
+                @{
+                    var productId = ViewBag.ProductId as Guid?;
+                    var productVariants = ViewBag.ProductVariants as List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto>();
+                    var productAttributes = ViewBag.ProductAttributes as List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+                    var allProductVariants = ViewBag.AllProductVariants as List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto>();
+                    var allProductAttributes = ViewBag.AllProductAttributes as List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+                    var existingStock = ViewBag.ExistingStock as PRN232_WebClient_Tachonogy.DTOs.StockDto;
+                }
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-layer-group me-2"></i>Select Additional Product Variants (Optional)
+                    <small class="text-muted">- Choose existing variants to associate with this product</small>
+                </h5>
+                <div class="mb-4">
+                    @{
+                        var allVariantsEdit = ViewBag.AllProductVariants as List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto>();
+                        var existingVariantIds = productVariants.Select(v => v.Id).ToHashSet();
+                    }
+                    @if (allVariantsEdit.Any())
+                    {
+                        <div class="form-control" style="max-height: 200px; overflow-y: auto; padding: 0.5rem;">
+                            @foreach (var variant in allVariantsEdit)
+                            {
+                                // Only show variants that don't already belong to this product
+                                if (!existingVariantIds.Contains(variant.Id))
+                                {
+                                    <div class="form-check mb-2" style="padding-left: 2rem;">
+                                        <input class="form-check-input" type="checkbox" name="SelectedVariantIds" value="@variant.Id" id="variant_edit_@variant.Id" />
+                                        <label class="form-check-label" for="variant_edit_@variant.Id">
+                                            <strong>@variant.VariantName</strong> - $@variant.Price.ToString("N2")
+                                            @if (!string.IsNullOrEmpty(variant.Sku))
+                                            {
+                                                <span class="text-muted">(SKU: @variant.Sku)</span>
+                                            }
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Select additional variants to associate with this product. Variants already associated are shown above.
+                        </small>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No additional variants available. <a asp-controller="ProductVariant" asp-action="Create" class="alert-link">Create a variant first</a>.
+                        </div>
+                    }
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-tags me-2"></i>Select Additional Product Attributes (Optional)
+                    <small class="text-muted">- Choose existing attributes to associate with this product</small>
+                </h5>
+                <div class="mb-4">
+                    @{
+                        var allAttributesEdit = ViewBag.AllProductAttributes as List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+                        var existingAttributeIds = productAttributes.Select(a => a.Id).ToHashSet();
+                    }
+                    @if (allAttributesEdit.Any())
+                    {
+                        <div class="form-control" style="max-height: 200px; overflow-y: auto; padding: 0.5rem;">
+                            @foreach (var attr in allAttributesEdit)
+                            {
+                                // Only show attributes that don't already belong to this product
+                                if (!existingAttributeIds.Contains(attr.Id))
+                                {
+                                    <div class="form-check mb-2" style="padding-left: 2rem;">
+                                        <input class="form-check-input" type="checkbox" name="SelectedAttributeIds" value="@attr.Id" id="attribute_edit_@attr.Id" />
+                                        <label class="form-check-label" for="attribute_edit_@attr.Id">
+                                            <strong>@(attr.AttributeName):</strong> @(attr.AttributeValue)
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Select additional attributes to associate with this product. Attributes already associated are shown above.
+                        </small>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No additional attributes available. <a asp-controller="ProductAttribute" asp-action="Create" class="alert-link">Create an attribute first</a>.
+                        </div>
+                    }
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-box-seam me-2"></i>Stock Management
+                    <small class="text-muted">- Update inventory quantity and location</small>
+                </h5>
+                <div class="mb-4 card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Current Quantity <span class="text-danger">*</span></label>
+                                <input type="number" name="Stock.Quantity" class="form-control" 
+                                       value="@(existingStock?.Quantity ?? 0)" min="0" required />
+                                <small class="text-muted">
+                                    @if (existingStock != null)
+                                    {
+                                        <text>Current stock: @existingStock.Quantity units</text>
+                                    }
+                                    else
+                                    {
+                                        <text>No stock record found. A new stock record will be created.</text>
+                                    }
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Location</label>
+                                <input type="text" name="Stock.Location" class="form-control" 
+                                       value="@(existingStock?.Location ?? "")" placeholder="e.g., Warehouse A, Shelf B-3" />
+                                <small class="text-muted">Physical location of the stock in warehouse</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Business Logic:</strong> Stock quantity represents available inventory. When quantity reaches 0, the product is out of stock. You can also manage stock from the Stock Management page.
+                        </div>
+                    </div>
+                </div>
+
+                @if (productId.HasValue)
+                {
+                    <hr class="my-4" />
+                    <h5 class="mb-3 fw-bold">
+                        <i class="bi bi-layer-group me-2"></i>Product Variants
+                    </h5>
+                    <div class="mb-4">
+                        @if (productVariants.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Variant Name</th>
+                                            <th>Price</th>
+                                            <th>SKU</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var variant in productVariants)
+                                        {
+                                            <tr>
+                                                <td>@variant.VariantName</td>
+                                                <td>$@variant.Price.ToString("N2")</td>
+                                                <td>@(variant.Sku ?? "N/A")</td>
+                                                <td>
+                                                    <a asp-controller="ProductVariant" asp-action="Edit" asp-route-id="@(variant.Id)" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No variants found for this product.</p>
+                        }
+                        <a asp-controller="ProductVariant" asp-action="Create" asp-route-productId="@(productId.Value)" class="btn btn-sm btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Add Variant
+                        </a>
+                    </div>
+
+                    <hr class="my-4" />
+                    <h5 class="mb-3 fw-bold">
+                        <i class="bi bi-tags me-2"></i>Product Attributes
+                    </h5>
+                    <div class="mb-4">
+                        @if (productAttributes.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Attribute Name</th>
+                                            <th>Attribute Value</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var attribute in productAttributes)
+                                        {
+                                            <tr>
+                                                <td>@(attribute.AttributeName)</td>
+                                                <td>@(attribute.AttributeValue)</td>
+                                                <td>
+                                                    <a asp-controller="ProductAttribute" asp-action="Edit" asp-route-id="@(attribute.Id)" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No attributes found for this product.</p>
+                        }
+                        <a asp-controller="ProductAttribute" asp-action="Create" asp-route-productId="@(productId.Value)" class="btn btn-sm btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Add Attribute
+                        </a>
+                    </div>
+                }
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let variantIndex = 0;
+        let attributeIndex = 0;
+
+        function addProductVariant() {
+            const container = document.getElementById('productVariantsContainer');
+            const variantDiv = document.createElement('div');
+            variantDiv.className = 'card mb-3 variant-item';
+            variantDiv.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">New Variant ${variantIndex + 1}</h6>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeProductVariant(this)">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Variant Name <span class="text-danger">*</span></label>
+                            <input type="text" name="ProductVariants[${variantIndex}].VariantName" class="form-control form-control-sm" 
+                                   placeholder="e.g., 16GB RAM + 512GB SSD" required />
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label small">Price <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" name="ProductVariants[${variantIndex}].Price" class="form-control form-control-sm" 
+                                   placeholder="0.00" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label small">SKU</label>
+                            <input type="text" name="ProductVariants[${variantIndex}].Sku" class="form-control form-control-sm" 
+                                   placeholder="Optional SKU" />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label small">Image URL</label>
+                            <input type="url" name="ProductVariants[${variantIndex}].ImageUrl" class="form-control form-control-sm" 
+                                   placeholder="https://example.com/image.jpg" />
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(variantDiv);
+            variantIndex++;
+        }
+
+        function removeProductVariant(button) {
+            button.closest('.variant-item').remove();
+        }
+
+        function addProductAttribute() {
+            const container = document.getElementById('productAttributesContainer');
+            const attributeDiv = document.createElement('div');
+            attributeDiv.className = 'card mb-3 attribute-item';
+            attributeDiv.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">New Attribute ${attributeIndex + 1}</h6>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeProductAttribute(this)">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Attribute Name <span class="text-danger">*</span></label>
+                            <input type="text" name="ProductAttributes[${attributeIndex}].AttributeName" class="form-control form-control-sm" 
+                                   placeholder="e.g., CPU, RAM, Screen" required />
+                        </div>
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label small">Attribute Value <span class="text-danger">*</span></label>
+                            <input type="text" name="ProductAttributes[${attributeIndex}].AttributeValue" class="form-control form-control-sm" 
+                                   placeholder="e.g., Intel i7, 16GB, 15.6 inch" required />
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(attributeDiv);
+            attributeIndex++;
+        }
+
+        function removeProductAttribute(button) {
+            button.closest('.attribute-item').remove();
+        }
+    </script>
+}
+
+

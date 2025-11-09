@@ -1,0 +1,56 @@
+@model PRN232_WebClient_Tachonogy.DTOs.CreateStockRequest
+
+@{
+    ViewData["Title"] = "Create Stock";
+    var productId = ViewBag.ProductId as Guid?;
+}
+
+<div class="container py-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                
+                @if (productId.HasValue)
+                {
+                    <input type="hidden" name="ProductId" id="ProductId" value="@(productId.Value)" />
+                    <div class="mb-3">
+                        <label class="form-label">Product ID</label>
+                        <input type="text" class="form-control" value="@(productId.Value)" readonly />
+                        <small class="text-muted">This stock will be associated with the selected product.</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label asp-for="ProductId" class="form-label"></label>
+                        <input asp-for="ProductId" class="form-control" />
+                        <span asp-validation-for="ProductId" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="Quantity" class="form-label"></label>
+                    <input asp-for="Quantity" type="number" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Location" class="form-label"></label>
+                    <input asp-for="Location" class="form-control" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

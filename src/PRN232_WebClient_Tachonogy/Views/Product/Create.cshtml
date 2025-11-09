@@ -1,0 +1,227 @@
+@model PRN232_WebClient_Tachonogy.DTOs.CreateProductRequest
+@{
+    ViewData["Title"] = "Create New Product";
+    var brands = ViewBag.Brands as List<PRN232_WebClient_Tachonogy.DTOs.BrandDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.BrandDto>();
+    var categories = ViewBag.Categories as List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto>();
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 fw-bold text-primary">
+        <i class="bi bi-plus-circle me-2"></i>@ViewData["Title"]
+    </h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                }
+
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="ProductName" class="form-label fw-semibold"></label>
+                        <input asp-for="ProductName" class="form-control" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Price" class="form-label fw-semibold"></label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="BrandId" class="form-label fw-semibold">Brand <span class="text-danger">*</span></label>
+                        @if (brands != null && brands.Any())
+                        {
+                            <select asp-for="BrandId" class="form-select" required>
+                                <option value="">-- Select Brand --</option>
+                                @foreach (var brand in brands)
+                                {
+                                    <option value="@(brand.Id)">@brand.BrandName</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select asp-for="BrandId" class="form-select" required disabled>
+                                <option value="">No brands available. Please add brands first.</option>
+                            </select>
+                            <small class="text-muted">No brands found. Please ensure brands are available in the system.</small>
+                        }
+                        <span asp-validation-for="BrandId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                        @if (categories != null && categories.Any())
+                        {
+                            <select asp-for="CategoryId" class="form-select" required>
+                                <option value="">-- Select Category --</option>
+                                @foreach (var category in categories)
+                                {
+                                    <option value="@(category.Id)">@category.CategoryName</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select asp-for="CategoryId" class="form-select" required disabled>
+                                <option value="">No categories available. Please add categories first.</option>
+                            </select>
+                            <small class="text-muted">No categories found. Please ensure categories are available in the system.</small>
+                        }
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Sku" class="form-label fw-semibold"></label>
+                        <input asp-for="Sku" class="form-control" />
+                        <span asp-validation-for="Sku" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ImageUrl" class="form-label fw-semibold">Image URL (Optional)</label>
+                        <input asp-for="ImageUrl" type="text" class="form-control" placeholder="https://example.com/image.jpg" />
+                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        <small class="text-muted">Leave empty if no image available. Must be a valid URL if provided.</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Specifications" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Specifications" class="form-control" rows="5" placeholder="Enter product specifications (one per line)"></textarea>
+                    <span asp-validation-for="Specifications" class="text-danger"></span>
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-layer-group me-2"></i>Select Product Variants (Optional)
+                    <small class="text-muted">- Choose existing variants to associate with this product</small>
+                </h5>
+                <div class="mb-4">
+                    @{
+                        var allVariants = ViewBag.AllProductVariants as List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductVariantDto>();
+                    }
+                    @if (allVariants.Any())
+                    {
+                        <div class="form-control" style="max-height: 200px; overflow-y: auto; padding: 0.5rem;">
+                            @foreach (var variant in allVariants)
+                            {
+                                <div class="form-check mb-2" style="padding-left: 2rem;">
+                                    <input class="form-check-input" type="checkbox" name="SelectedVariantIds" value="@variant.Id" id="variant_@variant.Id" />
+                                    <label class="form-check-label" for="variant_@variant.Id">
+                                        <strong>@variant.VariantName</strong> - $@variant.Price.ToString("N2")
+                                        @if (!string.IsNullOrEmpty(variant.Sku))
+                                        {
+                                            <span class="text-muted">(SKU: @variant.Sku)</span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Select variants that belong to this product. You can create new variants from the "Create Variant" button.
+                        </small>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No variants available. <a asp-controller="ProductVariant" asp-action="Create" class="alert-link">Create a variant first</a> to associate with products.
+                        </div>
+                    }
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-tags me-2"></i>Select Product Attributes (Optional)
+                    <small class="text-muted">- Choose existing attributes to associate with this product</small>
+                </h5>
+                <div class="mb-4">
+                    @{
+                        var allAttributes = ViewBag.AllProductAttributes as List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.ProductAttributeDto>();
+                    }
+                    @if (allAttributes.Any())
+                    {
+                        <div class="form-control" style="max-height: 200px; overflow-y: auto; padding: 0.5rem;">
+                            @foreach (var attr in allAttributes)
+                            {
+                                <div class="form-check mb-2" style="padding-left: 2rem;">
+                                    <input class="form-check-input" type="checkbox" name="SelectedAttributeIds" value="@attr.Id" id="attribute_@attr.Id" />
+                                    <label class="form-check-label" for="attribute_@attr.Id">
+                                        <strong>@(attr.AttributeName):</strong> @(attr.AttributeValue)
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Select attributes that belong to this product. You can create new attributes from the "Create Attribute" button.
+                        </small>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No attributes available. <a asp-controller="ProductAttribute" asp-action="Create" class="alert-link">Create an attribute first</a> to associate with products.
+                        </div>
+                    }
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-box-seam me-2"></i>Stock Management (Optional)
+                    <small class="text-muted">- Set initial inventory quantity and location</small>
+                </h5>
+                <div class="mb-4 card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Initial Quantity</label>
+                                <input type="number" name="Stock.Quantity" class="form-control" value="0" min="0" step="1" />
+                                <small class="text-muted">Enter the initial stock quantity (default: 0 if not specified)</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Location</label>
+                                <input type="text" name="Stock.Location" class="form-control" placeholder="e.g., Warehouse A, Shelf B-3" />
+                                <small class="text-muted">Optional: Physical location of the stock</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> Stock quantity can be updated later from the Stock Management page. This sets the initial inventory when creating the product.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Create Product
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

@@ -1,0 +1,303 @@
+@model PRN232_WebClient_Tachonogy.DTOs.PagedResult<PRN232_WebClient_Tachonogy.DTOs.StockDto>
+
+@{
+    ViewData["Title"] = "Stock Management";
+    var productId = ViewBag.ProductId as Guid?;
+    var location = ViewBag.Location as string ?? "";
+    var currentPage = ViewBag.Page ?? 1;
+    var maxPage = ViewBag.MaxPage ?? 1;
+    var stocksWithProducts = ViewBag.StocksWithProducts as List<(PRN232_WebClient_Tachonogy.DTOs.StockDto Stock, PRN232_WebClient_Tachonogy.DTOs.ProductDto? Product)> ?? new List<(PRN232_WebClient_Tachonogy.DTOs.StockDto, PRN232_WebClient_Tachonogy.DTOs.ProductDto?)>();
+}
+
+<style>
+    .stock-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        background: white;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .stock-item:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        background: #f1f5f9;
+        flex-shrink: 0;
+    }
+
+    .product-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .product-name {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        color: #1e293b;
+    }
+
+    .product-location {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quantity-input {
+        width: 80px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .quantity-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #cbd5e1;
+        background: white;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .quantity-btn:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .quantity-btn:active {
+        transform: scale(0.95);
+    }
+
+    .quantity-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .quantity-badge.low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .quantity-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .quantity-badge.high {
+        background: #d1fae5;
+        color: #065f46;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">
+            <i class="bi bi-box-seam me-2"></i>@ViewData["Title"]
+        </h2>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i> Add New Stock
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-action="Index" method="get" class="mb-3">
+        <div class="row g-2">
+            <div class="col-md-5">
+                <input type="text" name="productId" value="@productId" class="form-control" placeholder="Product ID (optional)">
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="location" value="@location" class="form-control" placeholder="Location (optional)">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </div>
+    </form>
+
+    @Html.AntiForgeryToken()
+
+    @if (Model == null || !Model.Items.Any())
+    {
+        <div class="alert alert-info text-center">No stock records found.</div>
+    }
+    else
+    {
+        <div class="stock-list">
+            @for (int i = 0; i < Model.Items.Count(); i++)
+            {
+                var stock = Model.Items.ElementAt(i);
+                var product = i < stocksWithProducts.Count ? stocksWithProducts[i].Product : null;
+                
+                <div class="stock-item" data-stock-id="@stock.Id">
+                    <!-- Product Image -->
+                    <div>
+                        @if (product != null && !string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.ProductName" class="product-image" />
+                        }
+                        else
+                        {
+                            <div class="product-image d-flex align-items-center justify-content-center">
+                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        <div class="product-name">
+                            @(product?.ProductName ?? $"Product ID: {stock.ProductId}")
+                        </div>
+                        <div class="product-location">
+                            <i class="bi bi-geo-alt me-1"></i>@(stock.Location ?? "No location")
+                        </div>
+                    </div>
+
+                    <!-- Quantity Controls -->
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn" onclick="updateQuantity('@stock.Id', -1)">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <input type="number" 
+                               id="quantity-@stock.Id" 
+                               class="form-control quantity-input" 
+                               value="@stock.Quantity" 
+                               min="0"
+                               onchange="setQuantity('@stock.Id', this.value)"
+                               onblur="updateQuantityDirect('@stock.Id', this.value)">
+                        <button type="button" class="quantity-btn" onclick="updateQuantity('@stock.Id', 1)">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Quantity Badge -->
+                    <div>
+                        @{
+                            var badgeClass = stock.Quantity == 0 ? "low" : (stock.Quantity < 10 ? "medium" : "high");
+                        }
+                        <span class="quantity-badge @badgeClass" id="badge-@stock.Id">
+                            @stock.Quantity units
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div>
+                        <a asp-action="Edit" asp-route-id="@stock.Id" class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@stock.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete stock record?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <form id="pageForm" method="get" asp-action="Index" class="d-flex align-items-center mt-3">
+            <input type="hidden" name="productId" value="@productId" />
+            <input type="hidden" name="location" value="@location" />
+            <button type="button" class="btn btn-secondary me-2" onclick="changePage(-1)">Previous</button>
+            <input type="number" id="pageInput" name="page" value="@currentPage" min="1" max="@maxPage" class="form-control mx-2" style="width:80px;" />
+            <span>of @maxPage</span>
+            <button type="button" class="btn btn-secondary ms-2" onclick="changePage(1)">Next</button>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function changePage(delta) {
+            let page = parseInt(document.getElementById("pageInput").value) || 1;
+            page += delta;
+            if (page < 1) page = 1;
+            if (page > @maxPage) page = @maxPage;
+            document.getElementById("pageInput").value = page;
+            document.getElementById("pageForm").submit();
+        }
+
+        function updateQuantity(stockId, delta) {
+            const input = document.getElementById(`quantity-${stockId}`);
+            const currentValue = parseInt(input.value) || 0;
+            const newValue = Math.max(0, currentValue + delta);
+            input.value = newValue;
+            updateQuantityDirect(stockId, newValue);
+        }
+
+        function setQuantity(stockId, value) {
+            const numValue = Math.max(0, parseInt(value) || 0);
+            document.getElementById(`quantity-${stockId}`).value = numValue;
+        }
+
+        function updateQuantityDirect(stockId, quantity) {
+            const quantityNum = Math.max(0, parseInt(quantity) || 0);
+            const input = document.getElementById(`quantity-${stockId}`);
+            const badge = document.getElementById(`badge-${stockId}`);
+            
+            // Disable input during update
+            input.disabled = true;
+
+            fetch(`/Stock/UpdateQuantity?id=${stockId}&quantity=${quantityNum}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = quantityNum;
+                    badge.textContent = `${quantityNum} units`;
+                    
+                    // Update badge color
+                    badge.className = 'quantity-badge ' + (quantityNum == 0 ? 'low' : (quantityNum < 10 ? 'medium' : 'high'));
+                } else {
+                    alert(data.message || 'Error updating quantity');
+                    // Revert to original value
+                    input.value = input.defaultValue;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating quantity. Please try again.');
+                input.value = input.defaultValue;
+            })
+            .finally(() => {
+                input.disabled = false;
+            });
+        }
+    </script>
+}

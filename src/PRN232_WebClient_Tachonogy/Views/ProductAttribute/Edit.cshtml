@@ -1,0 +1,37 @@
+@model PRN232_WebClient_Tachonogy.DTOs.UpdateProductAttributeRequest
+
+@{
+    ViewData["Title"] = "Edit Product Attribute";
+}
+
+<div class="container py-4">
+    <h2>@ViewData["Title"]</h2>
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="AttributeName" class="form-label"></label>
+                    <input asp-for="AttributeName" class="form-control" />
+                    <span asp-validation-for="AttributeName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AttributeValue" class="form-label"></label>
+                    <input asp-for="AttributeValue" class="form-control" />
+                    <span asp-validation-for="AttributeValue" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success">Save</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

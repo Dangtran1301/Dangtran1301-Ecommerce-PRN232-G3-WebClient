@@ -1,0 +1,959 @@
+@model PRN232_WebClient_Tachonogy.DTOs.PagedResult<PRN232_WebClient_Tachonogy.DTOs.ProductDto>
+
+@{
+    ViewData["Title"] = "Products";
+    var keyword = ViewBag.Keyword as string ?? "";
+    var brandId = ViewBag.BrandId as Guid?;
+    var categoryId = ViewBag.CategoryId as Guid?;
+    var currentPage = ViewBag.Page ?? 1;
+    var maxPage = ViewBag.MaxPage ?? 1;
+    var orderBy = ViewBag.OrderBy as string ?? "ProductName";
+    bool descending = false;
+    if (ViewBag.Descending is bool descValue)
+    {
+        descending = descValue;
+    }
+    var brands = ViewBag.Brands as List<PRN232_WebClient_Tachonogy.DTOs.BrandDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.BrandDto>();
+    var categories = ViewBag.Categories as List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto> ?? new List<PRN232_WebClient_Tachonogy.DTOs.CategoryDto>();
+}
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* CSS Variables */
+    :root {
+        --primary-color: #ef4444;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-300: #cbd5e1;
+        --gray-600: #475569;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+        --shadow-sm: 0 0.0625rem 0.125rem 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1);
+        --radius: 0.5rem;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--gray-50);
+        color: var(--gray-800);
+        line-height: 1.5;
+    }
+
+    /* Main container */
+    .products-container {
+        max-width: 87.5rem;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Header and Filter Section */
+    .header-filter-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.625rem;
+        border-bottom: 0.125rem solid var(--gray-200);
+        flex-wrap: wrap;
+        gap: 0.625rem;
+    }
+
+    .search-filters {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: nowrap;
+        min-width: min(31.25rem, 50vw);
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 12.5rem;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 0.125rem solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+            .search-box input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 0.1875rem rgb(37 99 235 / 0.1);
+            }
+
+    .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-600);
+    }
+
+    .form-select {
+        padding: 0.5rem 1rem;
+        border: 0.125rem solid var(--gray-200);
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        min-width: 7.5rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.1875rem rgb(37 99 235 / 0.1);
+        }
+
+    .btn-add {
+        background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        font-size: 0.9rem;
+    }
+
+        .btn-add:hover {
+            transform: translateY(-0.125rem);
+            box-shadow: var(--shadow-md);
+            color: white;
+        }
+
+    /* Products Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+        gap: 1rem;
+    }
+
+    /* Responsive breakpoints */
+    @@media (min-width: 100rem) {
+        .products-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    @@media (min-width: 81.25rem) and (max-width: 99.99rem) {
+        .products-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @@media (min-width: 62.5rem) and (max-width: 81.24rem) {
+        .products-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (min-width: 43.75rem) and (max-width: 62.49rem) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 43.74rem) {
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Product Card */
+    .product-card {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 0.0625rem solid var(--gray-200);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .product-card:hover {
+            transform: translateY(-0.125rem);
+            box-shadow: var(--shadow-md);
+        }
+
+    /* Card Image */
+    .card-image {
+        position: relative;
+        height: 10rem;
+        overflow: hidden;
+        background: var(--gray-50);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.05);
+    }
+
+    .no-image {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-600);
+        font-size: 0.75rem;
+    }
+
+        .no-image i {
+            font-size: 1.5rem;
+        }
+
+    /* Quick Actions */
+    .quick-actions {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .quick-actions {
+        opacity: 1;
+    }
+
+    .action-btn {
+        width: 1.75rem;
+        height: 1.75rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-600);
+        text-decoration: none;
+        font-size: 0.75rem;
+    }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .action-btn.edit-btn:hover {
+            background: #f59e0b;
+        }
+
+    /* Card Content */
+    .card-content {
+        padding: 0.75rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-category {
+        font-size: 0.65rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-description {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-stats {
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--gray-600);
+        font-size: 0.75rem;
+    }
+
+        .stat-item i {
+            color: var(--primary-color);
+            width: 0.75rem;
+        }
+
+    /* Card Footer */
+    .card-footer {
+        padding: 0.75rem;
+        border-top: 0.0625rem solid var(--gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: baseline;
+        gap: 0.25rem;
+    }
+
+    .price {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .price-unit {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+    }
+
+    .btn {
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .btn-details {
+        background: var(--primary-color);
+        color: white;
+    }
+
+        .btn-details:hover {
+            background: #1d4ed8;
+            color: white;
+        }
+
+    .btn-delete {
+        background: var(--danger-color);
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+    /* Pagination */
+    .pagination-section {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .pagination-info {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+    }
+
+    .btn-pagination {
+        padding: 0.5rem 1rem;
+        border: 0.125rem solid var(--gray-200);
+        border-radius: var(--radius);
+        background: white;
+        color: var(--gray-800);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-pagination:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-pagination:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .page-input {
+        width: 80px;
+        padding: 0.5rem;
+        border: 0.125rem solid var(--gray-200);
+        border-radius: var(--radius);
+        text-align: center;
+    }
+
+    /* Mobile Responsive */
+    @@media (max-width: 48rem) {
+        .products-container {
+            padding: 0.5rem;
+        }
+
+        .header-filter-section {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .search-filters {
+            flex-direction: column;
+            min-width: unset;
+        }
+
+        .search-box {
+            min-width: unset;
+        }
+
+        .form-select {
+            min-width: unset;
+            width: 100%;
+        }
+
+        .btn-add {
+            width: 100%;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            font-size: 1rem;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .dropdown {
+            width: 100%;
+        }
+
+        .dropdown > .btn-add {
+            width: 100%;
+        }
+
+        .card-footer {
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 0.25rem;
+        }
+
+        .action-buttons {
+            flex-wrap: nowrap;
+        }
+
+        .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Animation for card loading */
+    .product-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+
+    @@keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stagger animation for cards */
+    .product-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .product-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .product-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .product-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .product-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .product-card:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-600);
+    }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--gray-300);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+    /* Alert Messages */
+    .alert-message {
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        animation: slideInDown 0.3s ease;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .alert-message i {
+        font-size: 1.25rem;
+    }
+
+    @@keyframes slideInDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideOutUp {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+    }
+
+    .alert-message.fade-out {
+        animation: slideOutUp 0.3s ease forwards;
+    }
+</style>
+
+<!-- Main container with header and filters -->
+<div class="products-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-message alert-success" id="successAlert" style="animation: slideInDown 0.3s ease;">
+            <i class="fas fa-check-circle"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="alert-message alert-warning" id="warningAlert" style="animation: slideInDown 0.3s ease;">
+            <i class="fas fa-exclamation-triangle"></i>
+            @TempData["WarningMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-message alert-danger" id="errorAlert" style="animation: slideInDown 0.3s ease;">
+            <i class="fas fa-exclamation-circle"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Header and Filter Section -->
+    <div class="header-filter-section">
+        <form asp-action="Index" method="get" class="search-filters" id="searchForm" style="flex: 1;">
+            <div class="search-box">
+                <input type="text" name="keyword" id="keywordInput" value="@keyword" placeholder="Search products..." />
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <select name="brandId" class="form-select" id="brandSelect">
+                <option value="">All Brands</option>
+                @foreach (var brand in brands)
+                {
+                    <option value="@(brand.Id)" selected="@(brandId.HasValue && brandId.Value == brand.Id)">@brand.BrandName</option>
+                }
+            </select>
+            <select name="categoryId" class="form-select" id="categorySelect">
+                <option value="">All Categories</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@(category.Id)" selected="@(categoryId.HasValue && categoryId.Value == category.Id)">@category.CategoryName</option>
+                }
+            </select>
+            <select name="sortBy" class="form-select" id="sortBySelect">
+                <option value="ProductName" selected="@(orderBy == "ProductName")">Sort by Name</option>
+                <option value="Price_ASC" selected="@(orderBy == "Price" && !descending)">Price: Low to High</option>
+                <option value="Price_DESC" selected="@(orderBy == "Price" && descending)">Price: High to Low</option>
+            </select>
+            <input type="hidden" name="orderBy" id="orderByInput" value="@orderBy" />
+            <input type="hidden" name="descending" id="descendingInput" value="@(descending ? "true" : "false")" />
+            <button type="submit" class="btn btn-details" style="padding: 0.5rem 1rem;">
+                <i class="fas fa-search"></i> Filter
+            </button>
+            @if (!string.IsNullOrEmpty(keyword) || brandId.HasValue || categoryId.HasValue || (orderBy == "Price"))
+            {
+                <a asp-action="Index" class="btn btn-secondary" style="padding: 0.5rem 1rem; background: #64748b; color: white; border: none;">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            }
+        </form>
+
+        <!-- Action buttons -->
+        <div class="header-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a asp-action="Create" class="btn-add">
+                <i class="fas fa-plus"></i>
+                Add New Product
+            </a>
+            <a asp-controller="Stock" asp-action="Index" class="btn-add" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <i class="fas fa-warehouse"></i>
+                Manager Stock
+            </a>
+            <div class="dropdown" style="position: relative;">
+                <button class="btn-add" type="button" id="manageDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #10b981, #059669); cursor: pointer;">
+                    <i class="fas fa-cog"></i>
+                    Manage Variants & Attributes
+                    <i class="fas fa-chevron-down" style="font-size: 0.75rem; margin-left: 0.5rem;"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="manageDropdown" style="min-width: 250px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0;">
+                    <li>
+                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.5rem 1rem;">
+                            <i class="fas fa-layer-group me-2"></i>Product Variants
+                        </h6>
+                    </li>
+                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Index" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-list me-2"></i>View All Variants</a></li>
+                    <li><a class="dropdown-item" asp-controller="ProductVariant" asp-action="Create" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-plus me-2"></i>Create Variant</a></li>
+                    <li><hr class="dropdown-divider" style="margin: 0.5rem 0;"></li>
+                    <li>
+                        <h6 class="dropdown-header" style="font-weight: 600; color: #1e293b; padding: 0.5rem 1rem;">
+                            <i class="fas fa-tags me-2"></i>Product Attributes
+                        </h6>
+                    </li>
+                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Index" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-list me-2"></i>View All Attributes</a></li>
+                    <li><a class="dropdown-item" asp-controller="ProductAttribute" asp-action="Create" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-plus me-2"></i>Create Attribute</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    @if (Model == null || !Model.Items.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No products found</h3>
+            <p>There are currently no products in the system</p>
+            <a asp-action="Create" class="btn-add">
+                <i class="fas fa-plus"></i> Add first product
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var product in Model.Items)
+            {
+                <div class="product-card" data-brand="@product.BrandName" data-category="@product.CategoryName">
+                    <!-- Product Image -->
+                    <div class="card-image">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="@product.ProductName" class="product-img" 
+                                 onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                        }
+                        else
+                        {
+                            <div class="no-image">
+                                <i class="fas fa-image"></i>
+                                <span>No Image</span>
+                            </div>
+                        }
+
+                        <!-- Quick Actions Overlay -->
+                        <div class="quick-actions">
+                            <a asp-action="Detail" asp-route-id="@(product.Id)" class="action-btn" title="View details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@(product.Id)" class="action-btn edit-btn" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@(product.Id)" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                <button type="submit" class="action-btn" title="Delete" style="background: rgba(239, 68, 68, 0.9); border: none; cursor: pointer;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="card-content">
+                        <div class="product-category">@product.CategoryName</div>
+                        <h3 class="product-name">@product.ProductName</h3>
+                        <p class="product-description">@(string.IsNullOrEmpty(product.Description) ? "No description available." : product.Description)</p>
+                        <div class="product-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-tag"></i>
+                                <span>@product.BrandName</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(product.Sku))
+                            {
+                                <div class="stat-item">
+                                    <i class="fas fa-barcode"></i>
+                                    <span>SKU: @product.Sku</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Price and Actions -->
+                    <div class="card-footer">
+                        <div class="price-section">
+                            <span class="price">$@product.Price.ToString("N2")</span>
+                        </div>
+                        <div class="action-buttons">
+                            <a asp-action="Detail" asp-route-id="@(product.Id)" class="btn btn-details">
+                                Details
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@(product.Id)" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product? This action cannot be undone.');">
+                                <button type="submit" class="btn btn-delete" title="Delete">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-section">
+            <form id="pageForm" method="get" asp-action="Index" style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="hidden" name="keyword" value="@keyword" />
+                <input type="hidden" name="brandId" value="@brandId" />
+                <input type="hidden" name="categoryId" value="@categoryId" />
+                <input type="hidden" name="orderBy" value="@orderBy" />
+                <input type="hidden" name="pageSize" value="12" />
+
+                <button id="btnPre" type="button" class="btn-pagination" onclick="changePage(-1)">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+
+                <span>Page</span>
+                <input type="number" id="pageInput" name="page" value="@currentPage"
+                       min="1" max="@maxPage"
+                       onchange="validatePage()" class="page-input" />
+                <span>of @maxPage</span>
+
+                <button id="btnNext" type="button" class="btn-pagination" onclick="changePage(1)">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="pagination-info text-center" style="margin-top: 1rem;">
+            Showing @Model.Items.Count of @Model.TotalCount products
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const maxPage = @maxPage;
+        const btnPre = document.getElementById("btnPre");
+        const btnNext = document.getElementById("btnNext");
+        const pageInput = document.getElementById("pageInput");
+
+        function updateButtons(page) {
+            if (btnPre) btnPre.disabled = page <= 1;
+            if (btnNext) btnNext.disabled = page >= maxPage;
+        }
+
+        if (pageInput) {
+            updateButtons(parseInt(pageInput.value));
+        }
+
+        function changePage(delta) {
+            let page = parseInt(pageInput.value) || 1;
+            page += delta;
+
+            if (page < 1) page = 1;
+            if (page > maxPage) page = maxPage;
+
+            pageInput.value = page;
+            updateButtons(page);
+            document.getElementById("pageForm").submit();
+        }
+
+        function validatePage() {
+            let page = parseInt(pageInput.value);
+            if (!page || page < 1) {
+                pageInput.value = 1;
+            } else if (page > maxPage) {
+                pageInput.value = maxPage;
+            }
+        }
+
+        // Stagger animation for cards
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.product-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${0.1 * (index % 6 + 1)}s`;
+            });
+
+            // Search functionality - submit on Enter key
+            const keywordInput = document.getElementById('keywordInput');
+            if (keywordInput) {
+                keywordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('searchForm').submit();
+                    }
+                });
+            }
+
+            // Handle price sorting dropdown - update hidden inputs before form submit
+            const sortBySelect = document.getElementById('sortBySelect');
+            const orderByInput = document.getElementById('orderByInput');
+            const descendingInput = document.getElementById('descendingInput');
+            const searchForm = document.getElementById('searchForm');
+            
+            function updateSortingValues() {
+                if (sortBySelect && orderByInput && descendingInput) {
+                    const value = sortBySelect.value;
+                    if (value === 'Price_ASC') {
+                        orderByInput.value = 'Price';
+                        descendingInput.value = 'false';
+                    } else if (value === 'Price_DESC') {
+                        orderByInput.value = 'Price';
+                        descendingInput.value = 'true';
+                    } else {
+                        orderByInput.value = value;
+                        descendingInput.value = 'false';
+                    }
+                }
+            }
+            
+            if (sortBySelect) {
+                sortBySelect.addEventListener('change', updateSortingValues);
+            }
+            
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    updateSortingValues();
+                });
+            }
+
+            // Auto-hide success/warning/error messages after 5 seconds
+            const successAlert = document.getElementById('successAlert');
+            const warningAlert = document.getElementById('warningAlert');
+            const errorAlert = document.getElementById('errorAlert');
+
+            function hideAlert(alertElement) {
+                if (alertElement) {
+                    alertElement.classList.add('fade-out');
+                    setTimeout(() => {
+                        alertElement.style.display = 'none';
+                    }, 300);
+                }
+            }
+
+            if (successAlert) {
+                setTimeout(() => hideAlert(successAlert), 5000);
+            }
+            if (warningAlert) {
+                setTimeout(() => hideAlert(warningAlert), 5000);
+            }
+            if (errorAlert) {
+                setTimeout(() => hideAlert(errorAlert), 7000); // Error messages stay longer
+            }
+        });
+    </script>
+}
