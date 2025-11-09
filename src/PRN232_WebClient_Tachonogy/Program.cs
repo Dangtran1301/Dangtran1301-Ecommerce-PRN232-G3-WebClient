@@ -66,6 +66,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAdminClient, AdminClient>();
 builder.Services.AddScoped<ICategoryApiClient, CategoryApiClient>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IOrderApiClient, OrderApiClient>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductApiClient, ProductApiClient>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IProductAttributeApiClient, ProductAttributeApiClient>();
