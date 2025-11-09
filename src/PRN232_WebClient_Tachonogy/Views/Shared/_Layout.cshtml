@@ -58,15 +58,14 @@
                         }
                         else
                         {
-
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Auth" asp-action="Login">Login</a>
                             </li>
                         }
 
@@ -80,6 +79,24 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Users" asp-action="Index">User Management</a>
+                            </li>
+                        }
+                        @if (role is "Customer")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand</a>
+                            </li>
+                        }
+                        @if (role is "Seller")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Brand" asp-action="Index">Brand</a>
                             </li>
                         }
                         <li class="nav-item">
