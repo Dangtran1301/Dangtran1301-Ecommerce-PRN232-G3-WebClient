@@ -5,7 +5,7 @@ namespace PRN232_WebClient_Tachonogy.ApiClients;
 
 public class ProductVariantApiClient : IProductVariantApiClient
 {
-    private const string BaseUrl = "odata/ODataProductVariants";
+    private const string BaseUrl = "odata/product-variants";
     private readonly IApiClient apiClient;
     private readonly ODataApiClient odataClient;
 
@@ -70,14 +70,14 @@ public class ProductVariantApiClient : IProductVariantApiClient
     }
 
     public Task<ApiResponse<ProductVariantDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.GetAsync<ProductVariantDto>($"api/v1/catalog/product-variants/{id}", cancellationToken);
+        => apiClient.GetAsync<ProductVariantDto>($"product-variants/{id}", cancellationToken);
 
     public Task<ApiResponse<ProductVariantDto>> CreateAsync(CreateProductVariantRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PostAsync<ProductVariantDto>("api/v1/catalog/product-variants", request, cancellationToken);
+        => apiClient.PostAsync<ProductVariantDto>("product-variants", request, cancellationToken);
 
     public Task<ApiResponse<ProductVariantDto>> UpdateAsync(Guid id, UpdateProductVariantRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PutAsync<ProductVariantDto>($"api/v1/catalog/product-variants/{id}", request, cancellationToken);
+        => apiClient.PutAsync<ProductVariantDto>($"product-variants/{id}", request, cancellationToken);
 
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.DeleteAsync($"api/v1/catalog/product-variants/{id}", cancellationToken);
+        => apiClient.DeleteAsync($"product-variants/{id}", cancellationToken);
 }

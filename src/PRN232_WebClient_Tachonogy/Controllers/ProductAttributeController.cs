@@ -61,6 +61,7 @@ public class ProductAttributeController(
 
     [AllowAnonymous]
     [HttpGet]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Create(Guid? productId, CancellationToken cancellationToken = default)
     {
         // Load all products for dropdown using REST API
@@ -96,6 +97,7 @@ public class ProductAttributeController(
 
     [AllowAnonymous]
     [HttpPost]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Create(CreateProductAttributeRequest dto, CancellationToken cancellationToken)
     {
         // Validate ProductId
@@ -212,6 +214,7 @@ public class ProductAttributeController(
 
     [HttpGet]
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
         var productAttribute = await service.GetByIdAsync(id, cancellationToken);
@@ -228,6 +231,7 @@ public class ProductAttributeController(
 
     [HttpPost]
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Edit(Guid id, UpdateProductAttributeRequest dto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -245,7 +249,7 @@ public class ProductAttributeController(
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);

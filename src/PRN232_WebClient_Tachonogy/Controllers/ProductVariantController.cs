@@ -60,6 +60,7 @@ public class ProductVariantController(
     }
 
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     [HttpGet]
     public async Task<IActionResult> Create(Guid? productId, CancellationToken cancellationToken = default)
     {
@@ -96,6 +97,7 @@ public class ProductVariantController(
 
     [AllowAnonymous]
     [HttpPost]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Create(CreateProductVariantRequest dto, CancellationToken cancellationToken)
     {
         // Validate ProductId
@@ -221,6 +223,7 @@ public class ProductVariantController(
 
     [HttpGet]
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
         var productVariant = await service.GetByIdAsync(id, cancellationToken);
@@ -238,6 +241,7 @@ public class ProductVariantController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Seller")]
     [AllowAnonymous]
     public async Task<IActionResult> Edit(Guid id, UpdateProductVariantRequest dto, CancellationToken cancellationToken)
     {
@@ -256,7 +260,7 @@ public class ProductVariantController(
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var result = await service.DeleteAsync(id, cancellationToken);

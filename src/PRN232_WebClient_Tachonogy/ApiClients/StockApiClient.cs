@@ -5,7 +5,7 @@ namespace PRN232_WebClient_Tachonogy.ApiClients;
 
 public class StockApiClient : IStockApiClient
 {
-    private const string BaseUrl = "odata/ODataStocks";
+    private const string BaseUrl = "odata/stocks";
     private readonly IApiClient apiClient;
     private readonly ODataApiClient odataClient;
 
@@ -65,14 +65,14 @@ public class StockApiClient : IStockApiClient
     }
 
     public Task<ApiResponse<StockDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.GetAsync<StockDto>($"api/v1/catalog/stocks/{id}", cancellationToken);
+        => apiClient.GetAsync<StockDto>($"stocks/{id}", cancellationToken);
 
     public Task<ApiResponse<StockDto>> CreateAsync(CreateStockRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PostAsync<StockDto>("api/v1/catalog/stocks", request, cancellationToken);
+        => apiClient.PostAsync<StockDto>("stocks", request, cancellationToken);
 
     public Task<ApiResponse<StockDto>> UpdateAsync(Guid id, UpdateStockRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PutAsync<StockDto>($"api/v1/catalog/stocks/{id}", request, cancellationToken);
+        => apiClient.PutAsync<StockDto>($"stocks/{id}", request, cancellationToken);
 
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.DeleteAsync($"api/v1/catalog/stocks/{id}", cancellationToken);
+        => apiClient.DeleteAsync($"stocks/{id}", cancellationToken);
 }
