@@ -98,6 +98,7 @@ public class ProductController(
 
     [AllowAnonymous]
     [HttpGet]
+    [Authorize(Roles = "Admin,Seller")]
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
         // Get brands and categories for dropdown - use direct OData endpoint
@@ -143,6 +144,7 @@ public class ProductController(
     }
 
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateProductRequest dto, CancellationToken cancellationToken)
     {
@@ -409,6 +411,7 @@ public class ProductController(
     }
 
     [AllowAnonymous]
+    [Authorize(Roles = "Admin,Seller")]
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
@@ -522,6 +525,7 @@ public class ProductController(
     }
 
     [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Edit(Guid id, UpdateProductRequest dto, CancellationToken cancellationToken)
     {
@@ -737,6 +741,7 @@ public class ProductController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Seller")]
     [AllowAnonymous]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

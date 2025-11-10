@@ -5,7 +5,7 @@ namespace PRN232_WebClient_Tachonogy.ApiClients;
 
 public class ProductAttributeApiClient : IProductAttributeApiClient
 {
-    private const string BaseUrl = "odata/ODataProductAttributes";
+    private const string BaseUrl = "odata/product-attributes";
     private readonly IApiClient apiClient;
     private readonly ODataApiClient odataClient;
 
@@ -70,14 +70,14 @@ public class ProductAttributeApiClient : IProductAttributeApiClient
     }
 
     public Task<ApiResponse<ProductAttributeDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.GetAsync<ProductAttributeDto>($"api/v1/catalog/product-attributes/{id}", cancellationToken);
+        => apiClient.GetAsync<ProductAttributeDto>($"product-attributes/{id}", cancellationToken);
 
     public Task<ApiResponse<ProductAttributeDto>> CreateAsync(CreateProductAttributeRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PostAsync<ProductAttributeDto>("api/v1/catalog/product-attributes", request, cancellationToken);
+        => apiClient.PostAsync<ProductAttributeDto>("product-attributes", request, cancellationToken);
 
     public Task<ApiResponse<ProductAttributeDto>> UpdateAsync(Guid id, UpdateProductAttributeRequest request, CancellationToken cancellationToken = default)
-        => apiClient.PutAsync<ProductAttributeDto>($"api/v1/catalog/product-attributes/{id}", request, cancellationToken);
+        => apiClient.PutAsync<ProductAttributeDto>($"product-attributes/{id}", request, cancellationToken);
 
     public Task<ApiResponse<bool>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        => apiClient.DeleteAsync($"api/v1/catalog/product-attributes/{id}", cancellationToken);
+        => apiClient.DeleteAsync($"product-attributes/{id}", cancellationToken);
 }
